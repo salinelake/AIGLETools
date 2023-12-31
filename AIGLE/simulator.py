@@ -51,6 +51,8 @@ class GLESimulator:
         friction_sin = b / (a**2 + b**2)
         friction_tot = self.mem_coef_cos * friction_cos[None,:] + self.mem_coef_sin * friction_sin[None,:]
         friction_tot = -friction_tot.sum(-1).clone().detach()
+        friction_tot = th.clamp(friction_tot, min=1e-3)
+        ### TODOL: fix cuda device issue
         return LESimulator( self.temp, friction=friction_tot, 
             timestep=timestep, ndim=self.ndim, mass=self.mass.clone().detach())
     
@@ -102,8 +104,8 @@ class GLESimulator:
         self.noise_cos += dt * (- self.noise_cos / taus - self.noise_sin * ws )
         self.noise_sin += dt * (- self.noise_sin / taus + self.noise_cos * ws )
         
-    def applyConstrainVelocities(self):
-        self.v -= (self.v * self.mass).sum() / self.mass.sum()
+    # def applyConstrainVelocities(self):
+    #     self.v -= (self.v * self.mass).sum() / self.mass.sum()
         
     def applyConstrainPositions(self):
         # self.x = th.clamp(self.x, min=np2th(np.array([0.16, 0.15])), max=np2th(np.array([1.63, 1.32])))
@@ -116,35 +118,58 @@ class GLESimulator:
         instant_temp = 2 * kinetic / self.kbT * self.temp 
         return instant_temp
     
+    # def step(self, n):
+    #     """
+    #     This one allows larger time step, why??
+    #     scheme: ABOBA -> BOBAA
+    #     B: x->x+vdt/2
+    #     O: v->v+(F/m+Fv+noise)dt
+    #     AA: update Fv and noise by dt
+    #     """
+    #     dt = self.dt
+    #     for idx in range(n):
+    #         aforce = self.force_engine(self.x) / self.mass
+    #         # self.applyConstrainVelocities()
+    #         ## AA
+    #         self.updateMemory()
+    #         self.updateNoise()
+    #         ## B
+    #         self.x += 0.5 * dt * self.v
+    #         ## O
+    #         self.sumNoise()
+    #         self.sumFv()
+    #         self.v += dt * aforce
+    #         self.v += dt * self.Fv_tot
+    #         self.v += dt * self.noise_tot
+    #         ## B
+    #         self.x += 0.5 * dt * self.v
+    #         if self.position_constraint is not None:
+    #             self.applyConstrainPositions()
+    #         self._step += 1
+
     def step(self, n):
         """
-        This one allows larger time step, why??
-        scheme: ABOBA -> BOBAA
-        B: x->x+vdt/2
-        O: v->v+(F/m+Fv+noise)dt
-        AA: update Fv and noise by dt
+        leap frog
         """
         dt = self.dt
         for idx in range(n):
+            ## A
+            self.x += 0.5 * dt * self.v
+            ## 0
             aforce = self.force_engine(self.x) / self.mass
-            # self.applyConstrainVelocities()
-            ## AA
             self.updateMemory()
             self.updateNoise()
-            ## B
-            self.x += 0.5 * dt * self.v
-            ## O
             self.sumNoise()
             self.sumFv()
             self.v += dt * aforce
             self.v += dt * self.Fv_tot
             self.v += dt * self.noise_tot
-            ## B
+            ## A
             self.x += 0.5 * dt * self.v
             if self.position_constraint is not None:
                 self.applyConstrainPositions()
             self._step += 1
-                
+                                
     def _step(self, n):
         """
         scheme: ABOBA -> AABOB
@@ -185,8 +210,8 @@ class LESimulator:
         self.kbT = 1 ## energy unit is kbT
         self._step = 0
         self.friction = friction  # (ndim)
-        self.a = np.exp( -timestep * friction )
-        self.b = ( 1 - np.exp( -2 * timestep * friction ))**0.5
+        self.a = th.exp( -timestep * friction )
+        self.b = ( 1 - th.exp( -2 * timestep * friction ))**0.5
         
         ## system configuration
         self.x = np2th(np.zeros(ndim))
@@ -201,8 +226,8 @@ class LESimulator:
     def set_position(self, x0 ):
         self.x = x0.to(device=self.x.device) if th.is_tensor(x0) else np2th(x0)
         
-    def applyConstrainVelocities(self):
-        self.v -= (self.v * self.mass).sum() / self.mass.sum()
+    # def applyConstrainVelocities(self):
+    #     self.v -= (self.v * self.mass).sum() / self.mass.sum()
         
     def applyConstrainPositions(self):
         self.x = self.position_constraint(self.x)

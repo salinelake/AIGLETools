@@ -53,7 +53,7 @@ def get_exact_memory_kernel(_corr_vtv0, _corr_qtv0, kernel_length, dt):
         # for jj in range(ii+1):
         #     mat_cvv[ii, jj] = corr_vvplus[ ii-jj ]
     ## least square solution to <q(t)v(0)>=\int K(s) v(t-s)v(0)ds    
-    fit_b = corr_qtv0[1:] 
+    fit_b = corr_qtv0[1:kernel_length] 
     fit_A = mat_cvv * dt
     fit_t = np2th(dt*(np.arange(kernel_length-1)+0.5))
     lstsq_results = th.linalg.lstsq(fit_A, fit_b, rcond=None)

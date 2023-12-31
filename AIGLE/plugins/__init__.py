@@ -1,1 +1,1 @@
-from .openmm_integrator import GLEIntegrator
+from .openmm_integrator import GLEIntegrator, LEIntegrator
