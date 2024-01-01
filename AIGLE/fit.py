@@ -6,13 +6,13 @@ import json
 
  
 class AIGLE(th.nn.Module):
-    def __init__(self, dt, ndim, temp, v2avg, taus, nfreq=4):
+    def __init__(self, dt, ndim,  kbT, taus, nfreq=4):
         super().__init__()
+        print('intializing variable-mass GLE fit')
         ## constants
         self.dt = dt
         self.ndim = ndim
-        self.temp = temp # Kelvin
-        self.v2avg = v2avg 
+        self.kbT = kbT 
         if type(taus) is np.ndarray:
             _log_taus = np2th(np.log(taus))
         elif th.is_tensor(taus):
@@ -121,8 +121,8 @@ class AIGLE(th.nn.Module):
             noise_coef_cos = self.noise_coef_cos[idx]
             noise_coef_sin = self.noise_coef_sin[idx]
             corr_rr_spectrum_cos, corr_rr_spectrum_sin = self._compute_corr_rr(noise_coef_cos, noise_coef_sin, Mcc, Msc, Mcs, Mss)
-            mem_coef_cos = - corr_rr_spectrum_cos / self.v2avg[idx]
-            mem_coef_sin = - corr_rr_spectrum_sin / self.v2avg[idx]
+            mem_coef_cos = - corr_rr_spectrum_cos / self.kbT
+            mem_coef_sin = - corr_rr_spectrum_sin / self.kbT
 
             ## calculate the memory kernel
             mem_kernel  = (mem_kernel_cos * mem_coef_cos[:,None]).sum(0) 
@@ -168,12 +168,11 @@ class AIGLE(th.nn.Module):
         noise_coef = th2np(th.cat([self.noise_coef_cos, self.noise_coef_sin], -1)) 
         mem_coef = th2np(th.cat([self.mem_coef_cos, self.mem_coef_sin], -1)) 
         gle_dict = {
-            'temp': self.temp,
+            'kbT': self.kbT,
             'taus': th2np(self.mem_taus).tolist(),
             'freqs': th2np(self.mem_freqs).tolist(),
             'noise_coef': noise_coef.tolist(),
             'mem_coef': mem_coef.tolist(),
-            'average_v2': self.v2avg.tolist(),
         }
 
         with open(path, 'w', encoding='utf-8') as f:
