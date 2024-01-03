@@ -1,6 +1,6 @@
 import numpy as np
 import torch as th
-# from scipy.ndimage import gaussian_filter1d, convolve1d
+from scipy.ndimage import convolve1d
 
 def th2np(x):
     return x.detach().cpu().numpy()
@@ -17,14 +17,14 @@ def Corr_t(x,y, l ):
     else:
         return th.stack(corr)
     
-# def moving_average_half_gaussian(a, sigma=25, axis=-1, truncate=3.0):
-#     fsize = int(truncate * np.ceil(sigma))
-#     weights = [ np.exp(-x**2/2.0/sigma**2) for x in range(fsize) ]
-#     throw = fsize//2 + 1
-#     weights = np.array(weights)
-#     weights = weights / weights.sum()
-#     ret = convolve1d(a, weights, axis=axis, origin=1 )
-#     return ret[:,throw:-throw]
+def moving_average_half_gaussian(a, sigma=25, axis=-1, truncate=3.0):
+    fsize = int(truncate * np.ceil(sigma))
+    weights = [ np.exp(-x**2/2.0/sigma**2) for x in range(fsize) ]
+    throw = fsize//2 + 1
+    weights = np.array(weights)
+    weights = weights / weights.sum()
+    ret = convolve1d(a, weights, axis=axis, origin=1 )
+    return ret[:,throw:-throw]
 
 def get_exact_memory_kernel(_corr_vtv0, _corr_qtv0, kernel_length, dt):
     """
