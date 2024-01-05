@@ -7,6 +7,7 @@ class GLESimulator:
     def __init__(self, config, timestep=1, ndim=1, mass=None):
         ## system parameters
         self.temp = config['temp']
+        self.energy_engine = None
         self.force_engine = None
         self.position_constraint = None
         self.dt = timestep
@@ -32,6 +33,7 @@ class GLESimulator:
         
         ## system configuration
         self.x = np2th(np.zeros(ndim))
+        self.x_history = np2th(np.zeros((40, ndim)))
         self.v = np2th(np.zeros(ndim))
 
         ## GLE variables
@@ -52,19 +54,25 @@ class GLESimulator:
         friction_tot = self.mem_coef_cos * friction_cos[None,:] + self.mem_coef_sin * friction_sin[None,:]
         friction_tot = -friction_tot.sum(-1).clone().detach()
         friction_tot = th.clamp(friction_tot, min=1e-3)
-        ### TODOL: fix cuda device issue
-        return LESimulator( self.temp, friction=friction_tot, 
+        simulator = LESimulator( self.temp, friction=friction_tot, 
             timestep=timestep, ndim=self.ndim, mass=self.mass.clone().detach())
+        simulator.set_force_engine(self.force_engine)
+        simulator.set_energy_engine(self.energy_engine)
+        simulator.set_constraint(self.position_constraint)
+        return simulator
     
     def set_force_engine(self, f_func):
         self.force_engine = f_func 
+
+    def set_energy_engine(self, e_func):
+        self.energy_engine = e_func 
     
     def set_constraint(self, position_constraint):
         self.position_constraint = position_constraint
     
     def set_position(self, x0 ):
         self.x = x0.to(device=self.x.device) if th.is_tensor(x0) else np2th(x0)
-        
+        self.x_history = np2th(np.zeros((20, self.ndim))) + self.x[None,:] * 1.0
     def sumFv(self):
         """
         Update the total memory force Fv
@@ -147,7 +155,7 @@ class GLESimulator:
     #             self.applyConstrainPositions()
     #         self._step += 1
 
-    def step(self, n):
+    def step(self, n, energy_upper_bound=None):
         """
         leap frog
         """
@@ -168,7 +176,18 @@ class GLESimulator:
             self.x += 0.5 * dt * self.v
             if self.position_constraint is not None:
                 self.applyConstrainPositions()
-            self._step += 1
+            ## check energy constraint
+            energy = self.energy_engine(self.x)
+            if energy_upper_bound is not None and energy > energy_upper_bound:
+                self.x = self.x_history[-1]
+                print('warning: step={}, enter unexplored region, reset to previous position'.format(self._step))
+                if self._step > self.x_history.shape[0]:
+                    self._step -= (self.x_history.shape[0]-1)
+                else:
+                    raise ValueError('Invalid initial position, please reset')
+            else:
+                self.x_history = th.cat([self.x[None,:] * 1.0, self.x_history[:-1], ], dim=0)
+                self._step += 1
                                 
     def _step(self, n):
         """
@@ -205,6 +224,7 @@ class LESimulator:
         self.temp = temp
         self.ndim = ndim
         self.force_engine = None
+        self.energy_engine = None
         self.position_constraint = None
         self.mass = np2th(mass)  ## kbT / (nm/ps)**2
         self.kbT = 1 ## energy unit is kbT
@@ -215,11 +235,15 @@ class LESimulator:
         
         ## system configuration
         self.x = np2th(np.zeros(ndim))
+        self.x_history = np2th(np.zeros((40, ndim)))
         self.v = np2th(np.zeros(ndim))
 
     def set_force_engine(self, f_func):
         self.force_engine = f_func 
-        
+    
+    def set_energy_engine(self, e_func):
+        self.energy_engine = e_func
+
     def set_constraint(self, position_constraint):
         self.position_constraint = position_constraint
         
@@ -237,7 +261,7 @@ class LESimulator:
         instant_temp = 2 * kinetic / self.kbT * self.temp 
         return instant_temp
     
-    def step(self, n):
+    def step(self, n, energy_upper_bound=None):
         dt = self.dt
         for idx in range(n):
             aforce = self.force_engine(self.x) / self.mass
@@ -248,4 +272,15 @@ class LESimulator:
             self.x += 0.5 * dt * self.v
             if self.position_constraint is not None:
                 self.applyConstrainPositions()
-            self._step += 1
+            ## check energy constraint
+            energy = self.energy_engine(self.x)
+            if energy_upper_bound is not None and energy > energy_upper_bound:
+                self.x = self.x_history[-1]
+                print('warning: step={}, enter unexplored region, reset to previous position'.format(self._step))
+                if self._step > self.x_history.shape[0]:
+                    self._step -= (self.x_history.shape[0]-1)
+                else:
+                    raise ValueError('Invalid initial position, please reset')
+            else:
+                self.x_history = th.cat([self.x[None,:] * 1.0, self.x_history[:-1], ], dim=0)
+                self._step += 1
