@@ -1,18 +1,19 @@
 import numpy as np
 import torch as th
 from .utilities import np2th, th2np
- 
-
-class GLESimulator:
-    def __init__(self, config, timestep=1, ndim=1, mass=None):
+  
+class GLESimulator_VM:
+    def __init__(self, config, timestep=1, ndim=1):
+        print('intializing variable-mass GLE simulator')
         ## system parameters
-        self.temp = config['temp']
         self.energy_engine = None
         self.force_engine = None
+        self.mass_engine = None
         self.position_constraint = None
         self.dt = timestep
-        self.mass = np2th(mass)
-        self.kbT = 1 ## energy unit is kbT
+        # self.mass = np2th(mass)
+        # self.temp = config['temp']
+        self.kbT = config['kbT']
         self._step = 0
         
         ## GLE parameters
@@ -35,6 +36,7 @@ class GLESimulator:
         self.x = np2th(np.zeros(ndim))
         self.x_history = np2th(np.zeros((40, ndim)))
         self.v = np2th(np.zeros(ndim))
+        self.m = np2th(np.zeros(ndim))
 
         ## GLE variables
         #### memory force
@@ -46,21 +48,18 @@ class GLESimulator:
         self.noise_cos = th.zeros_like(self.Fv_cos)  ## cos component of noise, shape = (ndim, nmodes)
         self.noise_sin = th.zeros_like(self.Fv_cos)  ## sin component of noise, shape = (ndim, nmodes)
 
-    def get_langevin_integrator(self, timestep):
+    def get_langevin_integrator(self, timestep, mass):
         a = 1/self.taus
         b = self.ws
         friction_cos = a / (a**2 + b**2)
         friction_sin = b / (a**2 + b**2)
         friction_tot = self.mem_coef_cos * friction_cos[None,:] + self.mem_coef_sin * friction_sin[None,:]
         friction_tot = -friction_tot.sum(-1).clone().detach()
+        friction_tot /= mass
         friction_tot = th.clamp(friction_tot, min=1e-3)
-        simulator = LESimulator( self.temp, friction=friction_tot, 
-            timestep=timestep, ndim=self.ndim, mass=self.mass.clone().detach())
-        simulator.set_force_engine(self.force_engine)
-        simulator.set_energy_engine(self.energy_engine)
-        simulator.set_constraint(self.position_constraint)
         ### TODOL: fix cuda device issue
-        return simulator
+        return LESimulator( self.kbT, friction=friction_tot, 
+            timestep=timestep, ndim=self.ndim, mass=mass)
     
     def set_force_engine(self, f_func):
         self.force_engine = f_func 
@@ -70,6 +69,9 @@ class GLESimulator:
    
     def set_constraint(self, position_constraint):
         self.position_constraint = position_constraint
+
+    def set_mass_engine(self, mass_func):
+        self.mass_engine = mass_func
 
     def set_position(self, x0 ):
         self.x = x0.to(device=self.x.device) if th.is_tensor(x0) else np2th(x0)
@@ -83,7 +85,7 @@ class GLESimulator:
         taus = self.taus[None, :]
         ws = self.ws[None, :]
 
-        self.Fv_cos += dt * self.v[:,None]
+        self.Fv_cos += dt * self.m[:,None] * self.v[:,None]
         self.Fv_cos += dt * ( - self.Fv_cos / taus - self.Fv_sin * ws )
         self.Fv_sin += dt * ( - self.Fv_sin / taus + self.Fv_cos * ws )
         
@@ -107,6 +109,7 @@ class GLESimulator:
         ## get the total noise
         self.noise_tot = (self.noise_cos * self.noise_coef_cos).sum(-1)
         self.noise_tot += (self.noise_sin * self.noise_coef_sin).sum(-1)
+        self.noise_tot *= self.m **0.5
 
     # def applyConstrainVelocities(self):
     #     self.v -= (self.v * self.mass).sum() / self.mass.sum()
@@ -118,41 +121,14 @@ class GLESimulator:
         self.x = self.position_constraint(self.x)
         
     def get_instant_temp(self):
-        kinetic = 0.5 * (self.mass * self.v * self.v)
-        instant_temp = 2 * kinetic / self.kbT * self.temp 
+        mass = self.mass_engine(self.x)
+        kinetic = 0.5 * (mass * self.v * self.v)
+        instant_temp = 2 * kinetic / self.kbT 
         return instant_temp
-    
-    # def step(self, n):
-    #     """
-    #     This one allows larger time step, why??
-    #     scheme: ABOBA -> BOBAA
-    #     B: x->x+vdt/2
-    #     O: v->v+(F/m+Fv+noise)dt
-    #     AA: update Fv and noise by dt
-    #     """
-    #     dt = self.dt
-    #     for idx in range(n):
-    #         aforce = self.force_engine(self.x) / self.mass
-    #         # self.applyConstrainVelocities()
-    #         ## AA
-    #         self.updateMemory()
-    #         self.updateNoise()
-    #         ## B
-    #         self.x += 0.5 * dt * self.v
-    #         ## O
-    #         self.sumNoise()
-    #         self.sumFv()
-    #         self.v += dt * aforce
-    #         self.v += dt * self.Fv_tot
-    #         self.v += dt * self.noise_tot
-    #         ## B
-    #         self.x += 0.5 * dt * self.v
-    #         if self.position_constraint is not None:
-    #             self.applyConstrainPositions()
-    #         self._step += 1
-
+     
     def step(self, n, energy_upper_bound=None):
         """
+        Assuming mass varies much slower than velocity
         leap frog
         """
         dt = self.dt
@@ -161,10 +137,11 @@ class GLESimulator:
             self.x += 0.5 * dt * self.v
             ## 0
             force = self.force_engine(self.x) 
+            self.m = self.mass_engine(self.x) 
             self.updateMemory()
             self.updateNoise()
-            dv_dt = force / self.mass + self.Fv_tot + self.noise_tot
-            self.v += dt * dv_dt
+            dp_dt = force + self.Fv_tot + self.noise_tot
+            self.v += dt * dp_dt / self.m
             ## A
             self.x += 0.5 * dt * self.v
             if self.position_constraint is not None:
@@ -182,53 +159,27 @@ class GLESimulator:
                 self.x_history = th.cat([self.x[None,:] * 1.0, self.x_history[:-1], ], dim=0)
                 self._step += 1
 
-    def _step(self, n):
-        """
-        scheme: ABOBA -> AABOB
-        B: x->x+vdt/2
-        A: v->v+0.5(F/m)dt
-        O: update Fv and noise by dt
-        """
-        dt = self.dt
-        for idx in range(n):
-            aforce = self.force_engine(self.x) / self.mass
-            # AA
-            self.v += dt * aforce
-            ## B
-            self.x += 0.5 * dt * self.v
-            ## O
-            self.updateMemory()
-            self.updateNoise()
-            self.sumNoise()
-            self.sumFv()
-            self.v += dt * self.Fv_tot
-            self.v += dt * self.noise_tot
-            ## B
-            self.x += 0.5 * dt * self.v
-            # self.applyConstrainPositions()
-            if self.position_constraint is not None:
-                self.applyConstrainPositions()
-            self._step += 1
-
-class LESimulator:
-    def __init__(self, temp, friction, timestep=1, ndim=1, mass=None):
+class LESimulator_VM:
+    def __init__(self, kbT, friction, timestep=1, ndim=1, caging_k=None, caging_lag=None ):
         ## system parameters
         self.dt = timestep
-        self.temp = temp
+        # self.temp = temp
+        self.kbT = kbT
         self.ndim = ndim
         self.force_engine = None
         self.energy_engine = None
         self.position_constraint = None
-        self.mass = np2th(mass)  ## kbT / (nm/ps)**2
-        self.kbT = 1 ## energy unit is kbT
+        self.mass_engine = None  ## kbT / (nm/ps)**2
         self._step = 0
-        self.friction = friction  # (ndim)
+        self.friction = friction  # 1/ps * mass_unit (ndim)
         self.a = th.exp( -timestep * friction )
         self.b = ( 1 - th.exp( -2 * timestep * friction ))**0.5
-        
+        self.caging_k = caging_k
+        if self.caging_k is not None:
+            self.caging_lag = int(caging_lag / self.dt) + 1
         ## system configuration
         self.x = np2th(np.zeros(ndim))
-        self.x_history = np2th(np.zeros((40, ndim)))
+        self.x_history = np2th(np.zeros((self.caging_lag, ndim))) 
         self.v = np2th(np.zeros(ndim))
 
     def set_force_engine(self, f_func):
@@ -239,11 +190,13 @@ class LESimulator:
 
     def set_constraint(self, position_constraint):
         self.position_constraint = position_constraint
+    
+    def set_mass_engine(self, mass_func):
+        self.mass_engine = mass_func 
 
     def set_position(self, x0 ):
         self.x = x0.to(device=self.x.device) if th.is_tensor(x0) else np2th(x0)
         self.x_history = self.x_history *0 + self.x[None,:]
-        
     # def applyConstrainVelocities(self):
     #     self.v -= (self.v * self.mass).sum() / self.mass.sum()
         
@@ -251,30 +204,27 @@ class LESimulator:
         self.x = self.position_constraint(self.x)
         
     def get_instant_temp(self):
-        kinetic = 0.5 * (self.mass * self.v * self.v).mean()
-        instant_temp = 2 * kinetic / self.kbT * self.temp 
+        mass = self.mass_engine(self.x)
+        kinetic = 0.5 * (mass * self.v * self.v)
+        instant_temp = 2 * kinetic / self.kbT 
         return instant_temp
     
-    def step(self, n, energy_upper_bound=None):
+    def step(self, n):
         dt = self.dt
         for idx in range(n):
-            aforce = self.force_engine(self.x) / self.mass
-            gaussian = th.randn_like(self.x)
-            self.v += dt * aforce
             self.x += 0.5 * dt * self.v
-            self.v = self.a * self.v + self.b * gaussian * (self.kbT/self.mass)**0.5
+            force = self.force_engine(self.x)
+            if self.caging_k is not None:
+                force -= self.caging_k * (self.x - self.x_history[-1])
+            mass = self.mass_engine(self.x)
+            gaussian = th.randn_like(self.x)
+            p_friction = self.friction * mass
+            dp_dt = force - p_friction * self.v + gaussian * (2 * p_friction / dt * self.kbT )**0.5
+            self.v += dt * dp_dt / mass
             self.x += 0.5 * dt * self.v
             if self.position_constraint is not None:
                 self.applyConstrainPositions()
-            ## check energy constraint
-            energy = self.energy_engine(self.x)
-            if energy_upper_bound is not None and energy > energy_upper_bound:
-                self.x = self.x_history[-1]
-                print('warning: step={}, enter unexplored region, reset to previous position'.format(self._step))
-                if self._step > self.x_history.shape[0]:
-                    self._step -= (self.x_history.shape[0]-1)
-                else:
-                    raise ValueError('Invalid initial position, please reset')
-            else:
-                self.x_history = th.cat([self.x[None,:] * 1.0, self.x_history[:-1], ], dim=0)
-                self._step += 1
+            ## record
+            self.x_history = th.roll(self.x_history, 1, dims=0)
+            self.x_history[0] = self.x * 1.0
+            self._step += 1
