@@ -178,3 +178,13 @@ class AIGLE(th.nn.Module):
 
         with open(path, 'w', encoding='utf-8') as f:
             json.dump(gle_dict, f, ensure_ascii=False, indent=4)
+    
+
+    def load(self, path):
+        with open(path) as f:
+            config = json.load(f)
+        mem_coef = np2th(np.array(config['mem_coef'])) ## (ndim, nmodes*2)
+        noise_coef = np2th(np.array(config['noise_coef'])) ## (ndim, nmodes*2)
+        nfreq = int(np.array(config['taus']).size / self.log_taus.shape[0])
+        taus = np2th(np.array(config['taus']))[::self.nfreq]
+        self.log_taus.data = th.log(taus)
