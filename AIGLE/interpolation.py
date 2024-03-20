@@ -54,7 +54,7 @@ class interpolated_fes_2d:
         result = (1-shift_y)* f0 + shift_y * f1
         return result
 
-    def calc_energy(self, r):
+    def calc_energy_single(self, r):
         '''
         Calculate the free energy at a given position r
         '''
@@ -126,6 +126,7 @@ class interpolated_fes_2d:
     def calc_force(self, r):
         '''
         Calculate the force at given positions r
+        Args:
             r: 1d array of shape (2) or 2d array of shape (batchsize, 2) , the positions
         '''
         if self.use_torch:
@@ -142,3 +143,23 @@ class interpolated_fes_2d:
             return th.tensor(force, device=r.device, dtype=r.dtype)
         else:
             return force
+
+    def calc_energy(self, r):
+        '''
+        Calculate the free energy at given positions r
+        Args:
+            r: 1d array of shape (2) or 2d array of shape (batchsize, 2) , the positions
+        '''
+        if self.use_torch:
+            pos = th2np(r)
+        else:
+            pos = r
+        if pos.ndim == 1:
+            energy = self.calc_energy_single(pos)
+        else:
+            energy = np.array([self.calc_energy_single(p) for p in pos])
+            
+        if self.use_torch:
+            return th.tensor(energy, device=r.device, dtype=r.dtype)
+        else:
+            return energy
