@@ -74,10 +74,12 @@ class Trajectory:
             self.transform_matrix = eigM
             v = th.matmul(v, eigM)
             self.kinetics_dict['x'] = th.matmul(self.traj, eigM)[1:-1]
-            self.kinetics_dict['f'] = th.matmul(f, eigM)
+            if self.calc is not None:
+                self.kinetics_dict['f'] = th.matmul(f, eigM)
         else:
             self.kinetics_dict['x'] = self.traj[1:-1].clone()
-            self.kinetics_dict['f'] = f
+            if self.calc is not None:
+                self.kinetics_dict['f'] = f
         self.kinetics_dict['v_half_grid'] = v[1:]
         self.kinetics_dict['v'] = (v[1:] + v[:-1]) / 2
         self.kinetics_dict['a'] = (v[1:] - v[:-1]) / self.dt  

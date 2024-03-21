@@ -58,12 +58,8 @@ class interpolated_fes_2d:
         '''
         Calculate the free energy at a given position r
         '''
-        if self.use_torch:
-            pos = th2np(r)
-        else:
-            pos = r
         # get the position in the primary cell
-        x, y = self.scaled_position(pos[0], pos[1])
+        x, y = self.scaled_position(r[0], r[1])
         base_idx_x = int(np.floor(x))
         base_idx_y = int(np.floor(y))
         shift_x = x - base_idx_x
@@ -71,10 +67,7 @@ class interpolated_fes_2d:
         ## calculate the free energy
         submat = self.fes[base_idx_x:base_idx_x+2, base_idx_y:base_idx_y+2]
         energy = self.interpolate(submat, shift_x, shift_y)
-        if self.use_torch:
-            return th.tensor(energy, device=r.device, dtype=r.dtype)
-        else:
-            return energy
+        return energy
 
     def calc_force_single(self, r):
         '''
@@ -123,28 +116,35 @@ class interpolated_fes_2d:
         result = np.stack([fx, fy], axis=-1)
         return result
 
-    def calc_force(self, r):
+    def calc_force(self, r, transform=None):
         '''
         Calculate the force at given positions r
         Args:
             r: 1d array of shape (2) or 2d array of shape (batchsize, 2) , the positions
         '''
+        ## pre-process
         if self.use_torch:
             pos = th2np(r)
         else:
             pos = r
-
+        if transform is not None:
+            _pos = pos.reshape(-1,2) @ transform
+        ## evaluate force
         if pos.ndim == 1:
-            force = self.calc_force_single(pos)
+            force = self.calc_force_single(_pos.flatten())
+            if transform is not None:
+                force = (force.reshape(-1,2) @ transform.T).flatten()
         else:
-            force = self.calc_force_batched(pos)
-
+            force = self.calc_force_batched(_pos)
+            if transform is not None:
+                force = force @ transform.T
+        ## post-process
         if self.use_torch:
             return th.tensor(force, device=r.device, dtype=r.dtype)
         else:
             return force
 
-    def calc_energy(self, r):
+    def calc_energy(self, r, transform=None):
         '''
         Calculate the free energy at given positions r
         Args:
@@ -154,12 +154,22 @@ class interpolated_fes_2d:
             pos = th2np(r)
         else:
             pos = r
+
+        if transform is not None:
+            _pos = pos.reshape(-1,2) @ transform
+
         if pos.ndim == 1:
-            energy = self.calc_energy_single(pos)
+            energy = self.calc_energy_single(_pos.flatten())
         else:
-            energy = np.array([self.calc_energy_single(p) for p in pos])
+            energy = np.array([self.calc_energy_single(p) for p in _pos])
             
         if self.use_torch:
             return th.tensor(energy, device=r.device, dtype=r.dtype)
         else:
             return energy
+        
+    def get_energy_engine(self, transform):
+        return lambda r: self.calc_energy(r, transform)
+    
+    def get_force_engine(self, transform):
+        return lambda r: self.calc_force(r, transform)

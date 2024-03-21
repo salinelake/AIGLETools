@@ -159,6 +159,7 @@ class AIGLE(th.nn.Module):
 
     
     def save(self, path):
+        ## TODO: move this to trainer, save also mass and transform matrix.
         noise_coef = th2np(th.cat([self.noise_coef_cos, self.noise_coef_sin], -1))   # (ndim, 2*nmodes)
         mem_coef =   th2np(th.cat([self.mem_coef_cos,   self.mem_coef_sin],   -1))   # (ndim, 2*nmodes)
         gle_dict = {
