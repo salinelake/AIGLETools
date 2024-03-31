@@ -1,13 +1,13 @@
 import numpy as np
 import torch as th
-from .utilities import np2th, th2np
+from .utilities import np2th, th2np, moving_average_half_gaussian_torch
 from .decay_fourier import *
 
 class Trajectory:
     '''
     The class for storing and analyzing trajectory of collective variables.
     '''
-    def __init__(self, traj, dt, kbT):
+    def __init__(self, traj, dt, kbT=1):
         '''
         Args:
             traj: 2d numpy array of shape (nframes, ndim) , the trajectory
@@ -56,7 +56,7 @@ class Trajectory:
         self.calc = calc
         return
 
-    def process_kinetics(self, transform=False):
+    def process_kinetics(self, smooth_window=None, transform=False):
         '''
         Compute and store position, velocity, acceleration on the same grid with finite difference.
         Compute also the effective mass with equipartition theorem.
@@ -64,20 +64,24 @@ class Trajectory:
             transform: bool, whether to transform the trajectory with an orthogonal rotation matrix, 
                         to remove the instantaneous velocity correlation between different components.
         '''
-        v = (self.traj[1:] - self.traj[:-1]) / self.dt 
+        if smooth_window is None:
+            traj = self.traj
+        else:
+            traj = moving_average_half_gaussian_torch(self.traj, sigma=smooth_window)
+        v = (traj[1:] - traj[:-1]) / self.dt 
         if self.calc is not None:
-            f = self.calc.calc_force(self.traj[1:-1])
+            f = self.calc.calc_force(traj[1:-1])
         if transform:
             # remove the instantaneous velocity correlation between different components
             cross_vv = (v[:,:,None] * v[:,None,:]).mean(0)
             eig, eigM = th.linalg.eigh(cross_vv)
             self.transform_matrix = eigM
             v = th.matmul(v, eigM)
-            self.kinetics_dict['x'] = th.matmul(self.traj, eigM)[1:-1]
+            self.kinetics_dict['x'] = th.matmul(traj, eigM)[1:-1]
             if self.calc is not None:
                 self.kinetics_dict['f'] = th.matmul(f, eigM)
         else:
-            self.kinetics_dict['x'] = self.traj[1:-1].clone()
+            self.kinetics_dict['x'] = traj[1:-1].clone()
             if self.calc is not None:
                 self.kinetics_dict['f'] = f
         self.kinetics_dict['v_half_grid'] = v[1:]
@@ -108,8 +112,8 @@ class Trajectory:
         '''
         if self.kinetics_dict['f'] is None:
             raise ValueError('The force is not calculated yet. set a calculator by set_calc() and run process_kinetics().')
-        f = self.kinetics_dict['f'][skipheads:]
-        v = self.kinetics_dict['v_half_grid'][skipheads:]
+        f = self.kinetics_dict['f'][skipheads+1:]
+        v = self.kinetics_dict['v_half_grid'][skipheads:-1]
         fvcf_half_grid= th.zeros((nmax, self.ndim), dtype=v.dtype, device=v.device)
         fvcf_half_grid[0] = th.mean(f * v, dim=0)
         for i in range(1,nmax):

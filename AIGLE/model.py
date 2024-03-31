@@ -69,7 +69,8 @@ class AIGLE(th.nn.Module):
             mem_freqs: shape=(ntau*nfreq,)
         '''
         taus = th.exp(self.log_taus)
-        mem_freqs = 2 * np.pi / (self.mu * taus[:,None]) * np2th(np.arange(self.nfreq))[None,:]
+        # mem_freqs = 2 * np.pi / (self.mu * taus[:,None]) * np2th(np.arange(self.nfreq))[None,:]
+        mem_freqs = 2 * np.pi / (self.nfreq * taus[:,None]) * np2th(np.arange(self.nfreq))[None,:]
         mem_freqs = mem_freqs.flatten()
         return mem_freqs
         
@@ -159,18 +160,18 @@ class AIGLE(th.nn.Module):
 
     
     def save(self, path):
-        ## TODO: move this to trainer, save also mass and transform matrix.
-        noise_coef = th2np(th.cat([self.noise_coef_cos, self.noise_coef_sin], -1))   # (ndim, 2*nmodes)
-        mem_coef =   th2np(th.cat([self.mem_coef_cos,   self.mem_coef_sin],   -1))   # (ndim, 2*nmodes)
-        gle_dict = {
-            'kbT': self.kbT,
-            'taus':  th2np(self.get_mem_taus()).tolist(),
-            'freqs': th2np(self.get_mem_freqs()).tolist(),
-            'noise_coef': noise_coef.tolist(),
-            'mem_coef': mem_coef.tolist(),
-        }
-        with open(path, 'w', encoding='utf-8') as f:
-            json.dump(gle_dict, f, ensure_ascii=False, indent=4)
+        raise NotImplementedError('This method is not implemented yet')
+        # noise_coef = th2np(th.cat([self.noise_coef_cos, self.noise_coef_sin], -1))   # (ndim, 2*nmodes)
+        # mem_coef =   th2np(th.cat([self.mem_coef_cos,   self.mem_coef_sin],   -1))   # (ndim, 2*nmodes)
+        # gle_dict = {
+        #     'kbT': self.kbT,
+        #     'taus':  th2np(self.get_mem_taus()).tolist(),
+        #     'freqs': th2np(self.get_mem_freqs()).tolist(),
+        #     'noise_coef': noise_coef.tolist(),
+        #     'mem_coef': mem_coef.tolist(),
+        # }
+        # with open(path, 'w', encoding='utf-8') as f:
+        #     json.dump(gle_dict, f, ensure_ascii=False, indent=4)
     
 
     def load(self, path):

@@ -24,11 +24,12 @@ class interpolated_fes_2d:
             if np.abs(self.fes[:,0] - self.fes[:,-1]).max() > 1e-6:
                 raise ValueError("Periodic boundary condition is not satisfied, the free energy at the first and last column are different")
             # calculate the gradient of the free energy surface
-            self.grad_x = ( np.roll(fes_table,-1,0) - np.roll(fes_table, 1, 0 )) / 2 / dx
-            self.grad_y = ( np.roll(fes_table,-1,1) - np.roll(fes_table, 1, 1 )) / 2 / dy
+            fes_table_padx = np.concatenate([fes_table[[-2],:], fes_table, fes_table[[1],:]], axis=0)
+            fes_table_pady = np.concatenate([fes_table[:,[-2]], fes_table, fes_table[:,[1]]], axis=1)
+            self.grad_x = ( fes_table_padx[2:] - fes_table_padx[:-2] ) / 2 / dx
+            self.grad_y = ( fes_table_pady[:,2:] - fes_table_pady[:,:-2] ) / 2 / dy
         else:
-            self.grad_x = np.gradient(fes_table, [dx,dy], axis=0)
-            self.grad_y = np.gradient(fes_table, [dx,dy], axis=1)
+            self.grad_x, self.grad_y = np.gradient(fes_table, dx,dy)
 
     def scaled_position(self, x, y):
         '''
@@ -66,6 +67,8 @@ class interpolated_fes_2d:
         shift_y = y - base_idx_y
         ## calculate the free energy
         submat = self.fes[base_idx_x:base_idx_x+2, base_idx_y:base_idx_y+2]
+        if submat.shape[0] == 1 or submat.shape[1] == 1:
+            print(base_idx_x, base_idx_y, r[0], r[1], x, y,  )
         energy = self.interpolate(submat, shift_x, shift_y)
         return energy
 
@@ -127,15 +130,17 @@ class interpolated_fes_2d:
             pos = th2np(r)
         else:
             pos = r
+        ndim = pos.ndim
         if transform is not None:
-            _pos = pos.reshape(-1,2) @ transform
+            pos = pos.reshape(-1,2) @ transform
+
         ## evaluate force
-        if pos.ndim == 1:
-            force = self.calc_force_single(_pos.flatten())
+        if ndim == 1:
+            force = self.calc_force_single(pos.flatten())
             if transform is not None:
                 force = (force.reshape(-1,2) @ transform.T).flatten()
         else:
-            force = self.calc_force_batched(_pos)
+            force = self.calc_force_batched(pos)
             if transform is not None:
                 force = force @ transform.T
         ## post-process
@@ -154,14 +159,15 @@ class interpolated_fes_2d:
             pos = th2np(r)
         else:
             pos = r
+        ndim = pos.ndim
 
         if transform is not None:
-            _pos = pos.reshape(-1,2) @ transform
+            pos = pos.reshape(-1,2) @ transform
 
-        if pos.ndim == 1:
-            energy = self.calc_energy_single(_pos.flatten())
+        if ndim == 1:
+            energy = self.calc_energy_single(pos.flatten())
         else:
-            energy = np.array([self.calc_energy_single(p) for p in _pos])
+            energy = np.array([self.calc_energy_single(p) for p in pos])
             
         if self.use_torch:
             return th.tensor(energy, device=r.device, dtype=r.dtype)
