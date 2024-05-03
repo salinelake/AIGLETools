@@ -65,20 +65,32 @@ class GLEIntegrator(openmm.CustomIntegrator):
         """
         super(GLEIntegrator, self).__init__(timestep)
         
-        ## loading parameters
-        self.mem_taus =  np.array(config['taus']) 
-        self.mem_freqs =  np.array(config['freqs']) 
-        self.nmodes = self.mem_freqs.shape[0]
-        self.mem_coef = np.array(config['mem_coef'])  ## (nparticle, nmodes*2)
-        self.noise_coef = np.array(config['noise_coef']) ## (nparticle, nmodes*2)
+        ################ Loading GLE Parameters ################
+        self.taus =  np.array(config['taus']) 
+        self.alphas =  np.array(config['freqs']) 
+        self.nmodes = self.alphas.shape[0]
+        ## constanst for integration
+        self.z0_cos = np.exp(- 0.5 * timestep / self.taus) * np.cos(0.5 * timestep * self.alphas) 
+        self.z0_sin = np.exp(- 0.5 * timestep / self.taus) * np.sin(0.5 * timestep * self.alphas)
+        self.z1 = np.exp(- timestep / self.taus) * np.cos(timestep * self.alphas)
+        self.z2 = np.exp(- timestep / self.taus) * np.sin(timestep * self.alphas)
+
+        ## memory and noise coefficients
+        self.mem_coef = np.array(config['mem_coef']) ## (ndim, nmodes*2)
+        self.noise_coef = np.array(config['noise_coef']) ## (ndim, nmodes*2)
         self.nparticle = self.mem_coef.shape[0]
-        assert self.mem_coef.shape == self.noise_coef.shape, "Dimension of memory and noise coefficient does not match"
-        assert self.mem_coef.shape[1] == 2*self.nmodes, "The number of Memory coefficient for each particle does not match number of modes"
-        
+        assert self.mem_coef.shape == (self.nparticle, self.nmodes*2)
+        assert self.noise_coef.shape == (self.nparticle, self.nmodes*2)       
+
+        ################ Add Variables in OPENMM ################
         ## add CustomIntegrator global variables
         for i in range(self.nmodes):
-            self.addGlobalVariable('Taus{:d}'.format(i), self.mem_taus[i])
-            self.addGlobalVariable('Freqs{:d}'.format(i), self.mem_freqs[i])
+            self.addGlobalVariable('Taus{:d}'.format(i), self.taus[i])
+            self.addGlobalVariable('Freqs{:d}'.format(i), self.alphas[i])
+            self.addGlobalVariable('Z0Cos{:d}'.format(i), self.z0_cos[i])
+            self.addGlobalVariable('Z0Sin{:d}'.format(i), self.z0_sin[i])
+            self.addGlobalVariable('Z1{:d}'.format(i), self.z1[i])
+            self.addGlobalVariable('Z2{:d}'.format(i), self.z2[i])
         
         ## add CustomIntegrator per-Dof Variables
         ## assuming isotropic memery effects, replicate the memory&noise coefficients for x,y,z
@@ -90,6 +102,8 @@ class GLEIntegrator(openmm.CustomIntegrator):
         self.addNoiseComponents( _noise_coef[:,:,:self.nmodes], _noise_coef[:,:,self.nmodes:]) ## components of noise
         
         ## buffer
+        self.addPerDofVariable('BufferCos', 0)
+        self.addPerDofVariable('BufferSin', 0)
         self.addPerDofVariable('whiteNoise',0)
         self.addPerDofVariable("x1", 0)
         
@@ -107,12 +121,10 @@ class GLEIntegrator(openmm.CustomIntegrator):
             a Langevin Equation integrator with the instantaneous friction derived from the GLE integrator
         """
         ## get parameters
-        a = 1/self.mem_taus
-        b = self.mem_freqs
+        a = 1/self.taus
+        b = self.alphas
         mem_coef_cos = self.mem_coef[:,:self.nmodes]
         mem_coef_sin = self.mem_coef[:,self.nmodes:]
-        noise_coef_cos = self.noise_coef[:,:self.nmodes]
-        noise_coef_sin = self.noise_coef[:,self.nmodes:]
         
         ## compute the friction coefficient
         friction_cos = a / (a**2 + b**2)
@@ -126,7 +138,7 @@ class GLEIntegrator(openmm.CustomIntegrator):
         """
         Adds memory components to the integrator.
         FvCos[i] and Fvsin[i] value only, in the unit of length (nm).
-        CoefFvcos[i] and CoefFvsin[i] value only, in the the unit of (1/ps)^2.
+        MemCoefCos[i] and MemCoefSin[i] value only, in the the unit of (1/ps)^2.
         Args:
             mem_cf_cos (np.array): shape=(nparticle,3, nmodes), (value only) in unit of nm (1/ps)^2
             mem_cf_sin (np.array): shape=(nparticle,3, nmodes), (value only) in unit of (1/ps)^2
@@ -136,16 +148,16 @@ class GLEIntegrator(openmm.CustomIntegrator):
             self.addPerDofVariable('FvCos{:d}'.format(i), 0)
             self.addPerDofVariable('FvSin{:d}'.format(i), 0)
             ## the weight of the memory components in Fv
-            self.addPerDofVariable('CoefFvCos{:d}'.format(i), 0 )
-            self.setPerDofVariableByName('CoefFvCos{:d}'.format(i), mem_cf_cos[...,i] )
-            self.addPerDofVariable('CoefFvSin{:d}'.format(i), 0 )
-            self.setPerDofVariableByName('CoefFvSin{:d}'.format(i), mem_cf_sin[...,i])
+            self.addPerDofVariable('MemCoefCos{:d}'.format(i), 0 )
+            self.setPerDofVariableByName('MemCoefCos{:d}'.format(i), mem_cf_cos[...,i] )
+            self.addPerDofVariable('MemCoefSin{:d}'.format(i), 0 )
+            self.setPerDofVariableByName('MemCoefSin{:d}'.format(i), mem_cf_sin[...,i])
     
     def addNoiseComponents(self,  noise_cf_cos, noise_cf_sin):
         """
         Adds noise components to the integrator.
         NoiseCos[i] and NoiseSin[i] have the unit of length (nm).
-        CoefNoiseCos[i] and CoefNoiseSin[i] have the unit of (1/ps)^2.
+        NoiseCoefCos[i] and NoiseCoefSin[i] have the unit of (1/ps)^2.
         Args:
             noise_cf_cos (np.array): shape=(nparticle,3, nmodes), (value only) in unit of (1/ps)^2
             noise_cf_sin (np.array): shape=(nparticle,3, nmodes), (value only) in unit of (1/ps)^2
@@ -155,27 +167,27 @@ class GLEIntegrator(openmm.CustomIntegrator):
             self.addPerDofVariable('NoiseCos{:d}'.format(i),0)
             self.addPerDofVariable('NoiseSin{:d}'.format(i),0)
             ## the weight of the xi process in noise
-            self.addPerDofVariable('CoefNoiseCos{:d}'.format(i), 0 )
-            self.setPerDofVariableByName('CoefNoiseCos{:d}'.format(i), noise_cf_cos[...,i] )
-            self.addPerDofVariable('CoefNoiseSin{:d}'.format(i), 0 )
-            self.setPerDofVariableByName('CoefNoiseSin{:d}'.format(i), noise_cf_sin[...,i])
+            self.addPerDofVariable('NoiseCoefCos{:d}'.format(i), 0 )
+            self.setPerDofVariableByName('NoiseCoefCos{:d}'.format(i), noise_cf_cos[...,i] )
+            self.addPerDofVariable('NoiseCoefSin{:d}'.format(i), 0 )
+            self.setPerDofVariableByName('NoiseCoefSin{:d}'.format(i), noise_cf_sin[...,i])
 
     def updateMemory(self):
         """
         Update each memory component. Then sum up the memory force.
         """
         for i in range(self.nmodes):
+            self.addComputePerDof("BufferCos", "Z1{:d}*FvCos{:d} - Z2{:d}*FvSin{:d}".format(i,i,i,i))
+            self.addComputePerDof("BufferSin", "Z1{:d}*FvSin{:d} + Z2{:d}*FvCos{:d}".format(i,i,i,i))
             self.addComputePerDof("FvCos{:d}".format(i), 
-                                  "FvCos{:d} + dt*v".format(i))
-            self.addComputePerDof("FvCos{:d}".format(i), 
-                                  "FvCos{:d} + dt*( - FvCos{:d}/Taus{:d} - FvSin{:d}*Freqs{:d})".format(i,i,i,i,i))
+                                  "BufferCos + dt*Z0Cos{:d}*v*m".format(i))
             self.addComputePerDof("FvSin{:d}".format(i),
-                                  "FvSin{:d} + dt*( - FvSin{:d}/Taus{:d} + FvCos{:d}*Freqs{:d})".format(i,i,i,i,i))
+                                  "BufferSin + dt*Z0Sin{:d}*v*m".format(i))
         ## sum up the force
         self.addComputePerDof("Fv", "Fv*0")
         for i in range(self.nmodes):
             self.addComputePerDof("Fv", 
-                                  "Fv + CoefFvCos{:d}*FvCos{:d} + CoefFvSin{:d}*FvSin{:d}".format(i,i,i,i))
+                                  "Fv + MemCoefCos{:d}*FvCos{:d} + MemCoefSin{:d}*FvSin{:d}".format(i,i,i,i))
         
     def updateNoise(self):
         """
@@ -184,17 +196,17 @@ class GLEIntegrator(openmm.CustomIntegrator):
         self.addComputePerDof("whiteNoise", "sqrt(1/dt) * gaussian")
         for i in range(self.nmodes):
             ## cosine xi-process will take in the white noise scaled by sqrt(kBT/tau/m/dt)
+            self.addComputePerDof("BufferCos", "Z1{:d}*NoiseCos{:d} - Z2{:d}*NoiseSin{:d}".format(i,i,i,i))
+            self.addComputePerDof("BufferSin", "Z1{:d}*NoiseSin{:d} + Z2{:d}*NoiseCos{:d}".format(i,i,i,i))
             self.addComputePerDof("NoiseCos{:d}".format(i),
-                                  "NoiseCos{:d} + dt * whiteNoise".format(i))
-            self.addComputePerDof("NoiseCos{:d}".format(i),
-                                  "NoiseCos{:d} + dt * ( - NoiseCos{:d}/Taus{:d} - NoiseSin{:d}*Freqs{:d})".format(i,i,i,i,i))
+                                  "BufferCos + dt*Z0Cos{:d}*whiteNoise".format(i))
             self.addComputePerDof("NoiseSin{:d}".format(i),
-                                  "NoiseSin{:d} + dt * ( - NoiseSin{:d}/Taus{:d} + NoiseCos{:d}*Freqs{:d} )".format(i,i,i,i,i))
+                                  "BufferSin + dt*Z0Sin{:d}*whiteNoise".format(i))
         ## sum up the noise
         self.addComputePerDof("Noise", "Noise*0")
         for i in range(self.nmodes):
             self.addComputePerDof("Noise", 
-                                  "Noise + CoefNoiseCos{:d}*NoiseCos{:d} + CoefNoiseSin{:d}*NoiseSin{:d}".format(i,i,i,i))
+                                  "Noise + NoiseCoefCos{:d}*NoiseCos{:d} + NoiseCoefSin{:d}*NoiseSin{:d}".format(i,i,i,i))
                         
     def setIntegrationScheme(self):
         """
@@ -208,8 +220,8 @@ class GLEIntegrator(openmm.CustomIntegrator):
         self.updateMemory()
         self.updateNoise()
         self.addComputePerDof("v", "v + dt*f/m")
-        self.addComputePerDof("v", "v + dt*Fv")
-        self.addComputePerDof("v", "v + dt*Noise")
+        self.addComputePerDof("v", "v + dt*Fv/m")
+        self.addComputePerDof("v", "v + dt*Noise/sqrt(m)")
         ## update position
         self.addComputePerDof("x", "x + 0.5*dt*v")
         ## constraint positions
@@ -217,75 +229,4 @@ class GLEIntegrator(openmm.CustomIntegrator):
         self.addConstrainPositions()
         self.addComputePerDof("v", "v + (x-x1)/dt")
 
-
-if __name__ == '__main__':
-    from sys import stdout
-    import matplotlib.pyplot as plt
-    import numpy as np
-    import pandas
-    from openmm import *
-    from openmm.app import *
-    from openmm.unit import *
-    from openmmtools.testsystems import IdealGas
-    from gle_integrator import LangevinIntegrator, GLEIntegrator
-    from utilities import Corr_t
-    import h5py
-
-    ## system
-    nparticles = 32
-    ndim = nparticles*3
-    gas = IdealGas(nparticles=nparticles)
-    temp = 298*kelvin
-    timestep = 0.002 * picosecond
-    kB=BOLTZMANN_CONSTANT_kB
-    muc2 = 1.49241808560e-10 * openmm.unit.joule
-    sl = 3.0e5 * openmm.unit.nanometer/openmm.unit.picosecond
-    kbT = kB*temp / muc2 * openmm.unit.dalton * sl**2  # J-> dalton * (nm/ps)^2
-    masses = np.array([gas.system.getParticleMass(i).value_in_unit(openmm.unit.dalton) for i in range(nparticles)]) * openmm.unit.dalton
-    v2avg = kbT / masses
-    noise_scale = (v2avg**0.5).value_in_unit(nanometer/picosecond)
-    ## GLE parameters
-    tau = 0.1 * picosecond
-    max_period_in_tau = 4
-    nbasis = 10
-    max_period = tau * max_period_in_tau
-    ws = 2*np.pi / max_period * np.arange(nbasis)
-    ## load data
-    mem_cf_cos = np.load("data/mem_cf_cos.npy")
-    mem_cf_cos = - np.tile(mem_cf_cos, ndim).reshape(nparticles, 3, -1)
-    mem_cf_sin = np.load("data/mem_cf_sin.npy")
-    mem_cf_sin = - np.tile(mem_cf_sin, ndim).reshape(nparticles, 3, -1)
-    noise_cf_cos = np.load("data/noise_cf_cos.npy") 
-    noise_cf_cos = np.tile(noise_cf_cos, ndim).reshape(nparticles, 3, -1) * noise_scale[:,None,None]
-    noise_cf_sin = np.load("data/noise_cf_sin.npy")
-    noise_cf_sin = np.tile(noise_cf_sin, ndim).reshape(nparticles, 3, -1) * noise_scale[:,None,None]
-    ## set up integrator
-    integrator = GLEIntegrator(ws, mem_cf_cos, mem_cf_sin, 
-                            ws, noise_cf_cos, noise_cf_sin, 
-                            timestep, tau)
-    ## simulation
-    simulation = Simulation(gas.topology, gas.system, integrator)
-    simulation.context.setPositions(gas.positions)
-
-    simulation.reporters = []
-    simulation.reporters.append(StateDataReporter(
-        stdout, 1000, step=True, time=True,temperature=True, kineticEnergy=True, potentialEnergy=True,elapsedTime=True))
-    simulation.reporters.append(StateDataReporter(
-        "data/gas_le.csv",1000,time=True,potentialEnergy=True,kineticEnergy=True,totalEnergy=True,temperature=True,elapsedTime=True))
-    simulation.step(20000)
-
-    # h5_reporter = HDF5Reporter("data/gas_le.h5", 1, velocities=True)
-    # simulation.reporters.append(h5_reporter)
-
-    noise = []
-    vel = []
-    for i in range(20000):
-        simulation.step(1)
-        noise.append(integrator.getPerDofVariableByName('noise'))
-        state = simulation.context.getState(getVelocities=True)
-        vel.append(state.getVelocities().value_in_unit(nanometer/picosecond))
-
-    noise = np.array(noise)
-    vel = np.array(vel)
-    np.save('data/noise.npy', noise)
-    np.save('data/vel.npy', vel)
+ 

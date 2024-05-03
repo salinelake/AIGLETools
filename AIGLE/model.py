@@ -9,7 +9,7 @@ class AIGLE(th.nn.Module):
     '''
     The class for the AIGLE model.
     '''
-    def __init__(self, ndim, kbT=1, ntau=4, nfreq=4, mu=5, taus=None):
+    def __init__(self, ndim, kbT=1, ntau=4, nfreq=4,  taus=None):
         super().__init__()
         '''
         Args:
@@ -22,7 +22,6 @@ class AIGLE(th.nn.Module):
         self.ndim = ndim       # n
         self.ntau = ntau       # J
         self.nfreq = nfreq     # L
-        self.mu = mu           # mu
         self.nmodes = ntau * nfreq  # JL
         self.kbT = kbT
 
@@ -69,25 +68,10 @@ class AIGLE(th.nn.Module):
             mem_freqs: shape=(ntau*nfreq,)
         '''
         taus = th.exp(self.log_taus)
-        # mem_freqs = 2 * np.pi / (self.mu * taus[:,None]) * np2th(np.arange(self.nfreq))[None,:]
         mem_freqs = 2 * np.pi / (self.nfreq * taus[:,None]) * np2th(np.arange(self.nfreq))[None,:]
         mem_freqs = mem_freqs.flatten()
         return mem_freqs
         
-    # def get_mem_kernel(self, tgrid ):
-    #     '''
-    #     Returns:
-    #         memory kernel: shape=(ndim, *)
-    #     '''
-    #     mem_taus = self.get_mem_taus()
-    #     mem_freqs = self.get_mem_freqs()
-    #     ## get the basis of xi-process and their cumulative sum
-    #     mem_kernel_cos = get_decay_cos(tgrid[None,:], mem_taus[:,None], mem_freqs[:,None])  ## (nmodes, nsteps)
-    #     mem_kernel_sin = get_decay_sin(tgrid[None,:], mem_taus[:,None], mem_freqs[:,None])  ## (nmodes, nsteps)
-    #     mem_kernel  = (mem_kernel_cos[None,:,:] * self.mem_coef_cos[:,:,None]).sum(1)    ## (1,nmodes, nsteps)*(ndim, nmodes, 1)-> (ndim, nsteps) 
-    #     mem_kernel += (mem_kernel_sin[None,:,:] * self.mem_coef_sin[:,:,None]).sum(1) 
-    #     return mem_kernel  
-    
     def get_M_tensor(self):
         """
         Returns:
@@ -158,6 +142,24 @@ class AIGLE(th.nn.Module):
         memory_kernel = memory_kernel_cos + memory_kernel_sin
         return memory_kernel
 
+    def compute_accumulated_memory_kernel(self, tgrid):
+        '''
+        Compute the memory kernel on given time grid.
+        '''
+        mem_taus = self.get_mem_taus()
+        mem_freqs = self.get_mem_freqs()
+        mem_coef_cos, mem_coef_sin = self.compute_mem_coef_from_2FDT()   ## (ndim, nmodes)
+        mem_coef_cos = mem_coef_cos[:,:,None]  ## (ndim, nmodes, 1)
+        mem_coef_sin = mem_coef_sin[:,:,None]  ## (ndim, nmodes, 1)
+        basis_cos = get_decay_cos(tgrid[None,:], mem_taus[:,None], mem_freqs[:,None])[None,:,:]  ## (1, nmodes, nsteps)
+        basis_sin = get_decay_sin(tgrid[None,:], mem_taus[:,None], mem_freqs[:,None])[None,:,:]  ## (1, nmodes, nsteps)
+
+        a = 1/mem_taus[None,:,None]  # (1,nmodes,1)
+        b =  mem_freqs[None,:,None]  # (1,nmodes,1)
+        mem_accumulated_cos = b/(a**2+b**2) * basis_sin + a/(a**2+b**2) * (1-basis_cos)
+        mem_accumulated_sin = -a/(a**2+b**2) * basis_sin + b/(a**2+b**2) * (1-basis_cos)
+        memory_kernel = (mem_coef_cos * mem_accumulated_cos).sum(1) + (mem_coef_sin * mem_accumulated_sin).sum(1)
+        return memory_kernel
     
     def save(self, path):
         raise NotImplementedError('This method is not implemented yet')
@@ -175,11 +177,16 @@ class AIGLE(th.nn.Module):
     
 
     def load(self, path):
-        raise NotImplementedError('This method is not implemented yet')
-        # with open(path) as f:
-        #     config = json.load(f)
-        # mem_coef = np2th(np.array(config['mem_coef'])) ## (ndim, nmodes*2)
-        # noise_coef = np2th(np.array(config['noise_coef'])) ## (ndim, nmodes*2)
-        # nfreq = int(np.array(config['taus']).size / self.log_taus.shape[0])
-        # taus = np2th(np.array(config['taus']))[::self.nfreq]
-        # self.log_taus.data = th.log(taus)
+        with open(path) as f:
+            config = json.load(f)
+        taus = np2th(np.array(config['taus']))[::self.nfreq]
+        self.log_taus.data = th.log(taus)
+        mem_coef = np2th(np.array(config['mem_coef'])) ## (ndim, nmodes*2)
+        noise_coef = np2th(np.array(config['noise_coef'])) ## (ndim, nmodes*2)
+
+        
+        self.noise_coef_cos.data = noise_coef[:,:self.nmodes] ## (ndim, nmodes)
+        self.noise_coef_sin.data = noise_coef[:,self.nmodes:]
+        self.mem_coef_cos = mem_coef[:,:self.nmodes]
+        self.mem_coef_sin = mem_coef[:,self.nmodes:]
+        return

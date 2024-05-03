@@ -32,14 +32,15 @@ class GLESimulator:
 
         ## memory and noise coefficients
         self.mem_coef = np.array(config['mem_coef']) ## (ndim, nmodes*2)
+        self.noise_coef = np.array(config['noise_coef']) ## (ndim, nmodes*2)
+        assert self.mem_coef.shape == (ndim, nmodes*2)
+        assert self.noise_coef.shape == (ndim, nmodes*2)    
         self.mem_coef_cos = self.mem_coef[:,:nmodes] ## (ndim, nmodes)
         self.mem_coef_sin = self.mem_coef[:,nmodes:] ## (ndim, nmodes)
-        self.noise_coef = np.array(config['noise_coef']) ## (ndim, nmodes*2)
         self.noise_coef_cos = self.noise_coef[:,:nmodes] ## (ndim, nmodes)
         self.noise_coef_sin = self.noise_coef[:,nmodes:] ## (ndim, nmodes)
         
-        assert self.mem_coef.shape == (ndim, nmodes*2)
-        assert self.noise_coef.shape == (ndim, nmodes*2)       
+   
         
         ## system configuration
         self.x =  np.zeros(ndim) 
@@ -59,6 +60,8 @@ class GLESimulator:
     def get_langevin_integrator(self, timestep):
         a = 1/self.taus
         b = self.alphas
+        
+        ## compute the friction coefficient
         friction_cos = a / (a**2 + b**2)
         friction_sin = b / (a**2 + b**2)
         friction_tot = self.mem_coef_cos * friction_cos[None,:] + self.mem_coef_sin * friction_sin[None,:]

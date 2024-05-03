@@ -51,21 +51,23 @@ def fpt(traj, start, end, epsilon = 0.05):
 
 def moving_average_half_gaussian_torch(a, sigma=25, truncate=3.0):
     '''
-    smooth over the first axis with a half gaussian kernel
+    smooth over the first axis of a n-dimensional tensor with a half gaussian kernel
     Args:
-        a: tensor, (nframes, ndim)
+        a: tensor, (nframes,  *)
         sigma: float, the standard deviation of the gaussian kernel
         truncate: integer, the truncation of the gaussian kernel
     '''
+    out_shape = [s for s in a.shape]
     fsize = int(truncate * np.ceil(sigma))
     weights = [ np.exp(-x**2/2.0/sigma**2) for x in range(fsize) ]
     weights = np.array(weights)
     weights = weights / weights.sum()
     weights = th.tensor(weights, dtype=a.dtype, device=a.device)[None,None,:] # (1,1, kW) #->  conv1d: (out_ch, in_ch/groups, kW)
-    filtered_a = th.transpose(a, 0, 1)[:,None,:]  # (ndim, 1, nframes)  ->  conv1d: (minibatch, in_ch, iW)
+    filtered_a = th.transpose(a.reshape(out_shape[0], -1), 0, 1)[:,None,:]  # (ndim, 1, nframes)  ->  conv1d: (minibatch, in_ch, iW)
     filtered_a = th.nn.functional.conv1d(filtered_a, weights,  padding='valid')  # (ndim, 1, nframes - *)
     filtered_a = filtered_a.squeeze(1).transpose(0,1)  # (nframes - *, ndim)
-    return filtered_a
+    out_shape[0] = filtered_a.shape[0]
+    return filtered_a.reshape(out_shape)
 
 def get_exact_memory_kernel(_corr_vtv0, _corr_qtv0, kernel_length, dt):
     """
