@@ -1,6 +1,4 @@
-{:refdef: style="text-align: center;"}
-![logo](/docs/logo.png){: width="450" }
-{: refdef}
+![logo](/logo.png)
 # About AIGLETools
 Numerical framewort for non-Markovian modeling of multi-dimensional coarse-grained dynamics with generalized Langevin equations
  
