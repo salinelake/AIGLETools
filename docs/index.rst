@@ -1,5 +1,5 @@
 .. AIGLETools documentation master file, created by
-   sphinx-quickstart on Thu May  2 20:29:50 2024.
+   sphinx-quickstart on Fri May  3 02:59:16 2024.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 

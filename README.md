@@ -1,5 +1,5 @@
 <p align="center" >
-  <img width="20%" src="/docs/logo.png" />
+  <img width="20%" src="/logo.png" />
 </p>
 
 # About AIGLETools
