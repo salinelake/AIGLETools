@@ -1,19 +1,24 @@
 <p align="center" >
-  <img width="20%" src="/logo.png" />
+  <img width="80%" src="/docs/aigle_logo.png" />
 </p>
 
 # About AIGLETools
-Numerical framewort for non-Markovian modeling of multi-dimensional coarse-grained dynamics with generalized Langevin equations
- 
+AIGLETools is a package written in Python, designed to minimize the effort required to build multi-dimensional generalized Langevin equation (GLE) & Langevin equation (LE) models for time series data. 
 
 # Highlighted features
 
 # Credits
 
 # Installation
-Clone the package and pip install.
+pip install
 
 # Use AIGLETools
+## Load Dataset
 
-## Units
+## Train
+
+## Simulation
+
+# Examples
+<!-- ## Units -->
 
