@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AIGLE.interpolation &mdash; AIGLETools 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/documentation_options.js?v=2709fde1"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            AIGLETools
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">AIGLETools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">AIGLE.interpolation</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for AIGLE.interpolation</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">torch</span> <span class="k">as</span> <span class="nn">th</span>
+<span class="kn">from</span> <span class="nn">.utilities</span> <span class="kn">import</span> <span class="n">th2np</span>
+<div class="viewcode-block" id="interpolated_fes_2d">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.interpolation.interpolated_fes_2d">[docs]</a>
+<span class="k">class</span> <span class="nc">interpolated_fes_2d</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fes_table</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">pbc</span><span class="p">,</span> <span class="n">use_torch</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            fes_table: 2d array, the free energy surface</span>
+<span class="sd">            x0, y0: the origin of the free energy surface</span>
+<span class="sd">            dx, dy: the grid size of the free energy surface</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fes</span> <span class="o">=</span> <span class="n">fes_table</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_torch</span> <span class="o">=</span> <span class="n">use_torch</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ny</span> <span class="o">=</span> <span class="n">fes_table</span><span class="o">.</span><span class="n">shape</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x0</span> <span class="o">=</span> <span class="n">x0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y0</span> <span class="o">=</span> <span class="n">y0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dx</span> <span class="o">=</span> <span class="n">dx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dy</span> <span class="o">=</span> <span class="n">dy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lx</span> <span class="o">=</span> <span class="n">dx</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nx</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ly</span> <span class="o">=</span> <span class="n">dy</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ny</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pbc</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">fes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mf">1e-6</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Periodic boundary condition is not satisfied, the free energy at the first and last row are different&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fes</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">fes</span><span class="p">[:,</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mf">1e-6</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Periodic boundary condition is not satisfied, the free energy at the first and last column are different&quot;</span><span class="p">)</span>
+            <span class="c1"># calculate the gradient of the free energy surface</span>
+            <span class="n">fes_table_padx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">fes_table</span><span class="p">[[</span><span class="o">-</span><span class="mi">2</span><span class="p">],:],</span> <span class="n">fes_table</span><span class="p">,</span> <span class="n">fes_table</span><span class="p">[[</span><span class="mi">1</span><span class="p">],:]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">fes_table_pady</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">fes_table</span><span class="p">[:,[</span><span class="o">-</span><span class="mi">2</span><span class="p">]],</span> <span class="n">fes_table</span><span class="p">,</span> <span class="n">fes_table</span><span class="p">[:,[</span><span class="mi">1</span><span class="p">]]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grad_x</span> <span class="o">=</span> <span class="p">(</span> <span class="n">fes_table_padx</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span> <span class="o">-</span> <span class="n">fes_table_padx</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="p">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">dx</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grad_y</span> <span class="o">=</span> <span class="p">(</span> <span class="n">fes_table_pady</span><span class="p">[:,</span><span class="mi">2</span><span class="p">:]</span> <span class="o">-</span> <span class="n">fes_table_pady</span><span class="p">[:,:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="p">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">dy</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grad_x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">fes_table</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span><span class="n">dy</span><span class="p">)</span>
+
+<div class="viewcode-block" id="interpolated_fes_2d.scaled_position">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.interpolation.interpolated_fes_2d.scaled_position">[docs]</a>
+    <span class="k">def</span> <span class="nf">scaled_position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Always impose minimum image convention, no matter if the system is periodic or not</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            relative coordinates in the cell with respect to origin (x0,y0)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">lx</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">((</span><span class="n">x</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">x0</span><span class="p">)</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">lx</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">ly</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">((</span><span class="n">y</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">y0</span><span class="p">)</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">ly</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">x0</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">y0</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">dy</span>
+        <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span></div>
+
+
+<div class="viewcode-block" id="interpolated_fes_2d.interpolate">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.interpolation.interpolated_fes_2d.interpolate">[docs]</a>
+    <span class="k">def</span> <span class="nf">interpolate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">shift_x</span><span class="p">,</span> <span class="n">shift_y</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Interpolate the value of a 2x2 matrix</span>
+<span class="sd">        Args:</span>
+<span class="sd">            m: 2x2 array, the matrix to be interpolated</span>
+<span class="sd">            shift_x, shift_y: the shift of the point to the base point</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">f0</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">shift_x</span><span class="p">)</span> <span class="o">*</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">shift_x</span> <span class="o">*</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">f1</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">shift_x</span><span class="p">)</span> <span class="o">*</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">shift_x</span> <span class="o">*</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">shift_y</span><span class="p">)</span><span class="o">*</span> <span class="n">f0</span> <span class="o">+</span> <span class="n">shift_y</span> <span class="o">*</span> <span class="n">f1</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="interpolated_fes_2d.calc_energy_single">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.interpolation.interpolated_fes_2d.calc_energy_single">[docs]</a>
+    <span class="k">def</span> <span class="nf">calc_energy_single</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Calculate the free energy at a given position r</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># get the position in the primary cell</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaled_position</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">base_idx_x</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="n">base_idx_y</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+        <span class="n">shift_x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">-</span> <span class="n">base_idx_x</span>
+        <span class="n">shift_y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="n">base_idx_y</span>
+        <span class="c1">## calculate the free energy</span>
+        <span class="n">submat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fes</span><span class="p">[</span><span class="n">base_idx_x</span><span class="p">:</span><span class="n">base_idx_x</span><span class="o">+</span><span class="mi">2</span><span class="p">,</span> <span class="n">base_idx_y</span><span class="p">:</span><span class="n">base_idx_y</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">submat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">submat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">base_idx_x</span><span class="p">,</span> <span class="n">base_idx_y</span><span class="p">,</span> <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span>  <span class="p">)</span>
+        <span class="n">energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">submat</span><span class="p">,</span> <span class="n">shift_x</span><span class="p">,</span> <span class="n">shift_y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">energy</span></div>
+
+
+<div class="viewcode-block" id="interpolated_fes_2d.calc_force_single">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.interpolation.interpolated_fes_2d.calc_force_single">[docs]</a>
+    <span class="k">def</span> <span class="nf">calc_force_single</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Calculate the force at a given position r</span>
+<span class="sd">        Args:</span>
+<span class="sd">            r: 1d numpy array of shape (2) , the position</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># get the position in the primary cell</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaled_position</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">base_idx_x</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="n">base_idx_y</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+        <span class="n">shift_x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">-</span> <span class="n">base_idx_x</span>
+        <span class="n">shift_y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="n">base_idx_y</span>
+        <span class="c1">## calculate the force</span>
+        <span class="n">grad_x_submat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad_x</span><span class="p">[</span><span class="n">base_idx_x</span><span class="p">:</span><span class="n">base_idx_x</span><span class="o">+</span><span class="mi">2</span><span class="p">,</span> <span class="n">base_idx_y</span><span class="p">:</span><span class="n">base_idx_y</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">fx</span> <span class="o">=</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">grad_x_submat</span><span class="p">,</span> <span class="n">shift_x</span><span class="p">,</span> <span class="n">shift_y</span><span class="p">)</span>
+        <span class="n">grad_y_submat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad_y</span><span class="p">[</span><span class="n">base_idx_x</span><span class="p">:</span><span class="n">base_idx_x</span><span class="o">+</span><span class="mi">2</span><span class="p">,</span> <span class="n">base_idx_y</span><span class="p">:</span><span class="n">base_idx_y</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">fy</span> <span class="o">=</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">grad_y_submat</span><span class="p">,</span> <span class="n">shift_x</span><span class="p">,</span> <span class="n">shift_y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">fx</span><span class="p">,</span> <span class="n">fy</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="interpolated_fes_2d.calc_force_batched">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.interpolation.interpolated_fes_2d.calc_force_batched">[docs]</a>
+    <span class="k">def</span> <span class="nf">calc_force_batched</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Calculate the force at given positions r</span>
+<span class="sd">        Args:</span>
+<span class="sd">            r: 2d numpy array of shape (batchsize, 2) , the positions</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># get the positions in the primary cell</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaled_position</span><span class="p">(</span><span class="n">r</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">r</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">base_idx_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">base_idx_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">shift_x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">-</span> <span class="n">base_idx_x</span>
+        <span class="n">shift_y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="n">base_idx_y</span>
+        <span class="c1">## calculate the force</span>
+        <span class="n">grad_x_m00</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad_x</span><span class="p">[</span><span class="n">base_idx_x</span><span class="p">,</span> <span class="n">base_idx_y</span><span class="p">]</span>
+        <span class="n">grad_x_m01</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad_x</span><span class="p">[</span><span class="n">base_idx_x</span><span class="p">,</span> <span class="n">base_idx_y</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">grad_x_m10</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad_x</span><span class="p">[</span><span class="n">base_idx_x</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">base_idx_y</span><span class="p">]</span>
+        <span class="n">grad_x_m11</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad_x</span><span class="p">[</span><span class="n">base_idx_x</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">base_idx_y</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">grad_x_submat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">grad_x_m00</span><span class="p">,</span> <span class="n">grad_x_m01</span><span class="p">,</span> <span class="n">grad_x_m10</span><span class="p">,</span> <span class="n">grad_x_m11</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">grad_y_m00</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad_y</span><span class="p">[</span><span class="n">base_idx_x</span><span class="p">,</span> <span class="n">base_idx_y</span><span class="p">]</span>
+        <span class="n">grad_y_m01</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad_y</span><span class="p">[</span><span class="n">base_idx_x</span><span class="p">,</span> <span class="n">base_idx_y</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">grad_y_m10</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad_y</span><span class="p">[</span><span class="n">base_idx_x</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">base_idx_y</span><span class="p">]</span>
+        <span class="n">grad_y_m11</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad_y</span><span class="p">[</span><span class="n">base_idx_x</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">base_idx_y</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">grad_y_submat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">grad_y_m00</span><span class="p">,</span> <span class="n">grad_y_m01</span><span class="p">,</span> <span class="n">grad_y_m10</span><span class="p">,</span> <span class="n">grad_y_m11</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">fx</span> <span class="o">=</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">grad_x_submat</span><span class="p">,</span> <span class="n">shift_x</span><span class="p">,</span> <span class="n">shift_y</span><span class="p">)</span>
+        <span class="n">fy</span> <span class="o">=</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">grad_y_submat</span><span class="p">,</span> <span class="n">shift_x</span><span class="p">,</span> <span class="n">shift_y</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">fx</span><span class="p">,</span> <span class="n">fy</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="interpolated_fes_2d.calc_force">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.interpolation.interpolated_fes_2d.calc_force">[docs]</a>
+    <span class="k">def</span> <span class="nf">calc_force</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Calculate the force at given positions r</span>
+<span class="sd">        Args:</span>
+<span class="sd">            r: 1d array of shape (2) or 2d array of shape (batchsize, 2) , the positions</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1">## pre-process</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_torch</span><span class="p">:</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="n">th2np</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="n">r</span>
+        <span class="n">ndim</span> <span class="o">=</span> <span class="n">pos</span><span class="o">.</span><span class="n">ndim</span>
+        <span class="k">if</span> <span class="n">transform</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="n">pos</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="o">@</span> <span class="n">transform</span>
+
+        <span class="c1">## evaluate force</span>
+        <span class="k">if</span> <span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">force</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_force_single</span><span class="p">(</span><span class="n">pos</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">transform</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">force</span> <span class="o">=</span> <span class="p">(</span><span class="n">force</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="o">@</span> <span class="n">transform</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">force</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_force_batched</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">transform</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">force</span> <span class="o">=</span> <span class="n">force</span> <span class="o">@</span> <span class="n">transform</span><span class="o">.</span><span class="n">T</span>
+        <span class="c1">## post-process</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_torch</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">th</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">force</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">r</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">r</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">force</span></div>
+
+
+<div class="viewcode-block" id="interpolated_fes_2d.calc_energy">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.interpolation.interpolated_fes_2d.calc_energy">[docs]</a>
+    <span class="k">def</span> <span class="nf">calc_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Calculate the free energy at given positions r</span>
+<span class="sd">        Args:</span>
+<span class="sd">            r: 1d array of shape (2) or 2d array of shape (batchsize, 2) , the positions</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_torch</span><span class="p">:</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="n">th2np</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="n">r</span>
+        <span class="n">ndim</span> <span class="o">=</span> <span class="n">pos</span><span class="o">.</span><span class="n">ndim</span>
+
+        <span class="k">if</span> <span class="n">transform</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="n">pos</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="o">@</span> <span class="n">transform</span>
+
+        <span class="k">if</span> <span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_energy_single</span><span class="p">(</span><span class="n">pos</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">energy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">calc_energy_single</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pos</span><span class="p">])</span>
+            
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_torch</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">th</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">r</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">r</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">energy</span></div>
+
+        
+<div class="viewcode-block" id="interpolated_fes_2d.get_energy_engine">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.interpolation.interpolated_fes_2d.get_energy_engine">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_energy_engine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transform</span><span class="p">):</span>
+        <span class="k">return</span> <span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_energy</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">transform</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="interpolated_fes_2d.get_force_engine">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.interpolation.interpolated_fes_2d.get_force_engine">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_force_engine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transform</span><span class="p">):</span>
+        <span class="k">return</span> <span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_force</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">transform</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Pinchen Xie.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

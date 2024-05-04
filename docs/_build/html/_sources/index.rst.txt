@@ -24,7 +24,7 @@ Indices and tables
 * :ref:`search`
 
 
-Appendix
-=========
+.. Appendix
+.. =========
 
-:doc:`references/api_reference`
+.. :doc:`references/api_reference`

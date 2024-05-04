@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AIGLE.model &mdash; AIGLETools 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/documentation_options.js?v=2709fde1"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            AIGLETools
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">AIGLETools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">AIGLE.model</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for AIGLE.model</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">torch</span> <span class="k">as</span> <span class="nn">th</span>
+<span class="kn">from</span> <span class="nn">.utilities</span> <span class="kn">import</span> <span class="n">np2th</span><span class="p">,</span> <span class="n">th2np</span>
+<span class="kn">from</span> <span class="nn">.decay_fourier</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+ 
+<div class="viewcode-block" id="AIGLE">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.model.AIGLE">[docs]</a>
+<span class="k">class</span> <span class="nc">AIGLE</span><span class="p">(</span><span class="n">th</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    The class for the AIGLE model.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ndim</span><span class="p">,</span> <span class="n">kbT</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ntau</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">nfreq</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>  <span class="n">taus</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            ndim: int, the number of dimensions of the collective variables</span>
+<span class="sd">            ntau: int, the number of multi-scale relaxation times</span>
+<span class="sd">            nfreq: int, the number of frequencies in the decay-Fourier series associated with each relaxation time</span>
+<span class="sd">            taus: 1d array, initial guess of the multi-scale relaxation times</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1">## get the fixed parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">=</span> <span class="n">ndim</span>       <span class="c1"># n</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ntau</span> <span class="o">=</span> <span class="n">ntau</span>       <span class="c1"># J</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nfreq</span> <span class="o">=</span> <span class="n">nfreq</span>     <span class="c1"># L</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nmodes</span> <span class="o">=</span> <span class="n">ntau</span> <span class="o">*</span> <span class="n">nfreq</span>  <span class="c1"># JL</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kbT</span> <span class="o">=</span> <span class="n">kbT</span>
+
+        <span class="c1">## get the initial guess of the multi-scale relaxation time and store its logarithm</span>
+        <span class="k">if</span> <span class="n">taus</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">_log_taus</span> <span class="o">=</span> <span class="n">np2th</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">ntau</span><span class="p">)</span> <span class="o">-</span> <span class="mf">2.0</span><span class="p">)</span> <span class="o">*</span> <span class="mf">2.3</span> 
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">taus</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;taus should be positive&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">taus</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;taus should be 1d array&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ntau</span> <span class="o">!=</span> <span class="n">taus</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;ntau should be equal to the length of taus&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">taus</span><span class="p">)</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+                <span class="n">_log_taus</span> <span class="o">=</span> <span class="n">np2th</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">taus</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">th</span><span class="o">.</span><span class="n">is_tensor</span><span class="p">(</span><span class="n">taus</span><span class="p">):</span>
+                <span class="n">_log_taus</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np2th</span><span class="p">(</span><span class="n">th2np</span><span class="p">(</span><span class="n">taus</span><span class="p">)))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;taus should be an array or a tensor&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_taus</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">_log_taus</span><span class="p">)</span>
+
+        <span class="c1">## the parameters of noise generator (\sigma_ijl), i=1,2,...,ndim, j=1,2,...,ntau, l=1,2,...,nfreq</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">noise_coef_cos</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">th</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span> <span class="n">ndim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmodes</span><span class="p">)</span><span class="o">+</span><span class="mf">0.0001</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">noise_coef_sin</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">th</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span> <span class="n">ndim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmodes</span><span class="p">)</span><span class="o">+</span><span class="mf">0.0001</span><span class="p">)</span>
+
+        <span class="c1">## the parameters of memory kernel   (\phi_ijl),   i=1,2,...,ndim, j=1,2,...,ntau, l=1,2,...,nfreq</span>
+        <span class="c1">## these are not trainable, since they are calculated from the parameters of noise generator </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s1">&#39;mem_coef_cos&#39;</span><span class="p">,</span> <span class="n">th</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span> <span class="n">ndim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmodes</span><span class="p">)</span> <span class="p">)</span>  <span class="c1"># \phi_ijl</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s1">&#39;mem_coef_sin&#39;</span><span class="p">,</span> <span class="n">th</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span> <span class="n">ndim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmodes</span><span class="p">)</span> <span class="p">)</span>  <span class="c1"># \phi_ijl</span>
+        
+<div class="viewcode-block" id="AIGLE.get_mem_taus">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.model.AIGLE.get_mem_taus">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_mem_taus</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            mem_taus: shape=(ntau*nfreq,)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">taus</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_taus</span><span class="p">)</span>
+        <span class="n">mem_taus</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">taus</span><span class="p">[:,</span><span class="kc">None</span><span class="p">],(</span><span class="mi">1</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">nfreq</span><span class="p">))</span>
+        <span class="n">mem_taus</span>  <span class="o">=</span> <span class="n">mem_taus</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">mem_taus</span></div>
+
+        
+<div class="viewcode-block" id="AIGLE.get_mem_freqs">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.model.AIGLE.get_mem_freqs">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_mem_freqs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            mem_freqs: shape=(ntau*nfreq,)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">taus</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_taus</span><span class="p">)</span>
+        <span class="n">mem_freqs</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nfreq</span> <span class="o">*</span> <span class="n">taus</span><span class="p">[:,</span><span class="kc">None</span><span class="p">])</span> <span class="o">*</span> <span class="n">np2th</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nfreq</span><span class="p">))[</span><span class="kc">None</span><span class="p">,:]</span>
+        <span class="n">mem_freqs</span> <span class="o">=</span> <span class="n">mem_freqs</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">mem_freqs</span></div>
+
+        
+<div class="viewcode-block" id="AIGLE.get_M_tensor">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.model.AIGLE.get_M_tensor">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_M_tensor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            M_tensor: shape=(2,2, nmodes, nmodes)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">mem_taus</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_mem_taus</span><span class="p">()</span>
+        <span class="n">mem_freqs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_mem_freqs</span><span class="p">()</span>
+        <span class="n">inv_tau_mat</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">mem_taus</span><span class="p">[:,</span><span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">mem_taus</span><span class="p">[</span><span class="kc">None</span><span class="p">,:]</span>
+        <span class="n">Mcc</span> <span class="o">=</span> <span class="n">period_int_exp_cos_cos</span><span class="p">(</span><span class="n">inv_tau_mat</span><span class="p">,</span> <span class="n">mem_freqs</span><span class="p">[:,</span><span class="kc">None</span><span class="p">],</span> <span class="n">mem_freqs</span><span class="p">[</span><span class="kc">None</span><span class="p">,:])</span>
+        <span class="n">Msc</span> <span class="o">=</span> <span class="n">period_int_exp_sin_cos</span><span class="p">(</span><span class="n">inv_tau_mat</span><span class="p">,</span> <span class="n">mem_freqs</span><span class="p">[:,</span><span class="kc">None</span><span class="p">],</span> <span class="n">mem_freqs</span><span class="p">[</span><span class="kc">None</span><span class="p">,:])</span>
+        <span class="n">Mcs</span> <span class="o">=</span> <span class="n">period_int_exp_cos_sin</span><span class="p">(</span><span class="n">inv_tau_mat</span><span class="p">,</span> <span class="n">mem_freqs</span><span class="p">[:,</span><span class="kc">None</span><span class="p">],</span> <span class="n">mem_freqs</span><span class="p">[</span><span class="kc">None</span><span class="p">,:])</span>
+        <span class="n">Mss</span> <span class="o">=</span> <span class="n">period_int_exp_sin_sin</span><span class="p">(</span><span class="n">inv_tau_mat</span><span class="p">,</span> <span class="n">mem_freqs</span><span class="p">[:,</span><span class="kc">None</span><span class="p">],</span> <span class="n">mem_freqs</span><span class="p">[</span><span class="kc">None</span><span class="p">,:])</span>
+        <span class="n">M_tensor</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">Mcc</span><span class="p">,</span> <span class="n">Msc</span><span class="p">,</span> <span class="n">Mcs</span><span class="p">,</span> <span class="n">Mss</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">nmodes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmodes</span><span class="p">)</span>  <span class="c1">#  (2,2,JL,JL)</span>
+        <span class="k">return</span> <span class="n">M_tensor</span></div>
+
+
+<div class="viewcode-block" id="AIGLE.compute_mem_coef_from_2FDT">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.model.AIGLE.compute_mem_coef_from_2FDT">[docs]</a>
+    <span class="k">def</span> <span class="nf">compute_mem_coef_from_2FDT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">update_buffer</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Compute the memory kernel coefficients from the parameters of noise generator with second fluctuation dissipation theorem.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            mem_coef_cos: shape=(ndim, nmodes)</span>
+<span class="sd">            mem_coef_sin: shape=(ndim, nmodes)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># mem_taus = self.get_mem_taus()</span>
+        <span class="c1"># mem_freqs = self.get_mem_freqs()</span>
+        <span class="n">M_tensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_M_tensor</span><span class="p">()</span>
+        <span class="n">Mcc</span> <span class="o">=</span> <span class="n">M_tensor</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">Msc</span> <span class="o">=</span> <span class="n">M_tensor</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">Mcs</span> <span class="o">=</span> <span class="n">M_tensor</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">Mss</span> <span class="o">=</span> <span class="n">M_tensor</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">mem_coef_cos</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">mem_coef_sin</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ndim</span><span class="p">):</span>
+            <span class="n">sigma_cos_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_coef_cos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">sigma_sin_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_coef_sin</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            
+            <span class="n">phi_i_cos</span>  <span class="o">=</span> <span class="n">sigma_cos_i</span> <span class="o">*</span> <span class="p">(</span><span class="n">Mcc</span><span class="nd">@sigma_cos_i</span><span class="p">)</span>
+            <span class="n">phi_i_cos</span> <span class="o">+=</span> <span class="n">sigma_cos_i</span> <span class="o">*</span> <span class="p">(</span><span class="n">Mcs</span><span class="nd">@sigma_sin_i</span><span class="p">)</span>
+            <span class="n">phi_i_cos</span> <span class="o">+=</span> <span class="n">sigma_sin_i</span> <span class="o">*</span> <span class="p">(</span><span class="n">Msc</span><span class="nd">@sigma_cos_i</span><span class="p">)</span>
+            <span class="n">phi_i_cos</span> <span class="o">+=</span> <span class="n">sigma_sin_i</span> <span class="o">*</span> <span class="p">(</span><span class="n">Mss</span><span class="nd">@sigma_sin_i</span><span class="p">)</span>
+            <span class="n">phi_i_cos</span> <span class="o">=</span> <span class="o">-</span> <span class="n">phi_i_cos</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">kbT</span>
+
+            <span class="n">phi_i_sin</span>  <span class="o">=</span> <span class="o">-</span><span class="n">sigma_cos_i</span> <span class="o">*</span> <span class="p">(</span><span class="n">Msc</span><span class="nd">@sigma_cos_i</span><span class="p">)</span>
+            <span class="n">phi_i_sin</span> <span class="o">-=</span> <span class="n">sigma_cos_i</span> <span class="o">*</span> <span class="p">(</span><span class="n">Mss</span><span class="nd">@sigma_sin_i</span><span class="p">)</span>
+            <span class="n">phi_i_sin</span> <span class="o">+=</span> <span class="n">sigma_sin_i</span> <span class="o">*</span> <span class="p">(</span><span class="n">Mcc</span><span class="nd">@sigma_cos_i</span><span class="p">)</span>
+            <span class="n">phi_i_sin</span> <span class="o">+=</span> <span class="n">sigma_sin_i</span> <span class="o">*</span> <span class="p">(</span><span class="n">Mcs</span><span class="nd">@sigma_sin_i</span><span class="p">)</span>
+            <span class="n">phi_i_sin</span> <span class="o">=</span> <span class="o">-</span> <span class="n">phi_i_sin</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">kbT</span>
+            <span class="n">mem_coef_cos</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">phi_i_cos</span><span class="p">)</span>
+            <span class="n">mem_coef_sin</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">phi_i_sin</span><span class="p">)</span>
+        <span class="n">mem_coef_cos</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">mem_coef_cos</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">mem_coef_sin</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">mem_coef_sin</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">update_buffer</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mem_coef_cos</span> <span class="o">=</span> <span class="n">mem_coef_cos</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mem_coef_sin</span> <span class="o">=</span> <span class="n">mem_coef_sin</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">mem_coef_cos</span><span class="p">,</span> <span class="n">mem_coef_sin</span></div>
+
+
+<div class="viewcode-block" id="AIGLE.compute_memory_kernel">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.model.AIGLE.compute_memory_kernel">[docs]</a>
+    <span class="k">def</span> <span class="nf">compute_memory_kernel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tgrid</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Compute the memory kernel on given time grid.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">mem_taus</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_mem_taus</span><span class="p">()</span>
+        <span class="n">mem_freqs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_mem_freqs</span><span class="p">()</span>
+        <span class="n">mem_coef_cos</span><span class="p">,</span> <span class="n">mem_coef_sin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_mem_coef_from_2FDT</span><span class="p">()</span>
+        <span class="n">basis_cos</span> <span class="o">=</span> <span class="n">get_decay_cos</span><span class="p">(</span><span class="n">tgrid</span><span class="p">[</span><span class="kc">None</span><span class="p">,:],</span> <span class="n">mem_taus</span><span class="p">[:,</span><span class="kc">None</span><span class="p">],</span> <span class="n">mem_freqs</span><span class="p">[:,</span><span class="kc">None</span><span class="p">])</span>  <span class="c1">## (nmodes, nsteps)</span>
+        <span class="n">basis_sin</span> <span class="o">=</span> <span class="n">get_decay_sin</span><span class="p">(</span><span class="n">tgrid</span><span class="p">[</span><span class="kc">None</span><span class="p">,:],</span> <span class="n">mem_taus</span><span class="p">[:,</span><span class="kc">None</span><span class="p">],</span> <span class="n">mem_freqs</span><span class="p">[:,</span><span class="kc">None</span><span class="p">])</span>  <span class="c1">## (nmodes, nsteps)</span>
+        <span class="n">memory_kernel_cos</span> <span class="o">=</span> <span class="p">(</span><span class="n">mem_coef_cos</span><span class="p">[:,:,</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">basis_cos</span><span class="p">[</span><span class="kc">None</span><span class="p">,:,:])</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  <span class="c1">## (ndim, nsteps)</span>
+        <span class="n">memory_kernel_sin</span> <span class="o">=</span> <span class="p">(</span><span class="n">mem_coef_sin</span><span class="p">[:,:,</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">basis_sin</span><span class="p">[</span><span class="kc">None</span><span class="p">,:,:])</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  <span class="c1">## (ndim, nsteps)</span>
+        <span class="n">memory_kernel</span> <span class="o">=</span> <span class="n">memory_kernel_cos</span> <span class="o">+</span> <span class="n">memory_kernel_sin</span>
+        <span class="k">return</span> <span class="n">memory_kernel</span></div>
+
+
+<div class="viewcode-block" id="AIGLE.compute_accumulated_memory_kernel">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.model.AIGLE.compute_accumulated_memory_kernel">[docs]</a>
+    <span class="k">def</span> <span class="nf">compute_accumulated_memory_kernel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tgrid</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Compute the memory kernel on given time grid.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">mem_taus</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_mem_taus</span><span class="p">()</span>
+        <span class="n">mem_freqs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_mem_freqs</span><span class="p">()</span>
+        <span class="n">mem_coef_cos</span><span class="p">,</span> <span class="n">mem_coef_sin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_mem_coef_from_2FDT</span><span class="p">()</span>   <span class="c1">## (ndim, nmodes)</span>
+        <span class="n">mem_coef_cos</span> <span class="o">=</span> <span class="n">mem_coef_cos</span><span class="p">[:,:,</span><span class="kc">None</span><span class="p">]</span>  <span class="c1">## (ndim, nmodes, 1)</span>
+        <span class="n">mem_coef_sin</span> <span class="o">=</span> <span class="n">mem_coef_sin</span><span class="p">[:,:,</span><span class="kc">None</span><span class="p">]</span>  <span class="c1">## (ndim, nmodes, 1)</span>
+        <span class="n">basis_cos</span> <span class="o">=</span> <span class="n">get_decay_cos</span><span class="p">(</span><span class="n">tgrid</span><span class="p">[</span><span class="kc">None</span><span class="p">,:],</span> <span class="n">mem_taus</span><span class="p">[:,</span><span class="kc">None</span><span class="p">],</span> <span class="n">mem_freqs</span><span class="p">[:,</span><span class="kc">None</span><span class="p">])[</span><span class="kc">None</span><span class="p">,:,:]</span>  <span class="c1">## (1, nmodes, nsteps)</span>
+        <span class="n">basis_sin</span> <span class="o">=</span> <span class="n">get_decay_sin</span><span class="p">(</span><span class="n">tgrid</span><span class="p">[</span><span class="kc">None</span><span class="p">,:],</span> <span class="n">mem_taus</span><span class="p">[:,</span><span class="kc">None</span><span class="p">],</span> <span class="n">mem_freqs</span><span class="p">[:,</span><span class="kc">None</span><span class="p">])[</span><span class="kc">None</span><span class="p">,:,:]</span>  <span class="c1">## (1, nmodes, nsteps)</span>
+
+        <span class="n">a</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">mem_taus</span><span class="p">[</span><span class="kc">None</span><span class="p">,:,</span><span class="kc">None</span><span class="p">]</span>  <span class="c1"># (1,nmodes,1)</span>
+        <span class="n">b</span> <span class="o">=</span>  <span class="n">mem_freqs</span><span class="p">[</span><span class="kc">None</span><span class="p">,:,</span><span class="kc">None</span><span class="p">]</span>  <span class="c1"># (1,nmodes,1)</span>
+        <span class="n">mem_accumulated_cos</span> <span class="o">=</span> <span class="n">b</span><span class="o">/</span><span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">basis_sin</span> <span class="o">+</span> <span class="n">a</span><span class="o">/</span><span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">basis_cos</span><span class="p">)</span>
+        <span class="n">mem_accumulated_sin</span> <span class="o">=</span> <span class="o">-</span><span class="n">a</span><span class="o">/</span><span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">basis_sin</span> <span class="o">+</span> <span class="n">b</span><span class="o">/</span><span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">basis_cos</span><span class="p">)</span>
+        <span class="n">memory_kernel</span> <span class="o">=</span> <span class="p">(</span><span class="n">mem_coef_cos</span> <span class="o">*</span> <span class="n">mem_accumulated_cos</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">mem_coef_sin</span> <span class="o">*</span> <span class="n">mem_accumulated_sin</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">memory_kernel</span></div>
+
+    
+<div class="viewcode-block" id="AIGLE.save">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.model.AIGLE.save">[docs]</a>
+    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;This method is not implemented yet&#39;</span><span class="p">)</span></div>
+
+        <span class="c1"># noise_coef = th2np(th.cat([self.noise_coef_cos, self.noise_coef_sin], -1))   # (ndim, 2*nmodes)</span>
+        <span class="c1"># mem_coef =   th2np(th.cat([self.mem_coef_cos,   self.mem_coef_sin],   -1))   # (ndim, 2*nmodes)</span>
+        <span class="c1"># gle_dict = {</span>
+        <span class="c1">#     &#39;kbT&#39;: self.kbT,</span>
+        <span class="c1">#     &#39;taus&#39;:  th2np(self.get_mem_taus()).tolist(),</span>
+        <span class="c1">#     &#39;freqs&#39;: th2np(self.get_mem_freqs()).tolist(),</span>
+        <span class="c1">#     &#39;noise_coef&#39;: noise_coef.tolist(),</span>
+        <span class="c1">#     &#39;mem_coef&#39;: mem_coef.tolist(),</span>
+        <span class="c1"># }</span>
+        <span class="c1"># with open(path, &#39;w&#39;, encoding=&#39;utf-8&#39;) as f:</span>
+        <span class="c1">#     json.dump(gle_dict, f, ensure_ascii=False, indent=4)</span>
+    
+
+<div class="viewcode-block" id="AIGLE.load">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.model.AIGLE.load">[docs]</a>
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">config</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="n">taus</span> <span class="o">=</span> <span class="n">np2th</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;taus&#39;</span><span class="p">]))[::</span><span class="bp">self</span><span class="o">.</span><span class="n">nfreq</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_taus</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">taus</span><span class="p">)</span>
+        <span class="n">mem_coef</span> <span class="o">=</span> <span class="n">np2th</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;mem_coef&#39;</span><span class="p">]))</span> <span class="c1">## (ndim, nmodes*2)</span>
+        <span class="n">noise_coef</span> <span class="o">=</span> <span class="n">np2th</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;noise_coef&#39;</span><span class="p">]))</span> <span class="c1">## (ndim, nmodes*2)</span>
+
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">noise_coef_cos</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">noise_coef</span><span class="p">[:,:</span><span class="bp">self</span><span class="o">.</span><span class="n">nmodes</span><span class="p">]</span> <span class="c1">## (ndim, nmodes)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">noise_coef_sin</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">noise_coef</span><span class="p">[:,</span><span class="bp">self</span><span class="o">.</span><span class="n">nmodes</span><span class="p">:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mem_coef_cos</span> <span class="o">=</span> <span class="n">mem_coef</span><span class="p">[:,:</span><span class="bp">self</span><span class="o">.</span><span class="n">nmodes</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mem_coef_sin</span> <span class="o">=</span> <span class="n">mem_coef</span><span class="p">[:,</span><span class="bp">self</span><span class="o">.</span><span class="n">nmodes</span><span class="p">:]</span>
+        <span class="k">return</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Pinchen Xie.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

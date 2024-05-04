@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AIGLE package &mdash; AIGLETools 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/documentation_options.js?v=2709fde1"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            AIGLETools
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">AIGLE package</a><ul>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-AIGLE.decay_fourier">AIGLE.decay_fourier module</a><ul>
+<li><a class="reference internal" href="#AIGLE.decay_fourier.get_decay_basis"><code class="docutils literal notranslate"><span class="pre">get_decay_basis()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.decay_fourier.get_decay_cos"><code class="docutils literal notranslate"><span class="pre">get_decay_cos()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.decay_fourier.get_decay_cos_cumsum"><code class="docutils literal notranslate"><span class="pre">get_decay_cos_cumsum()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.decay_fourier.get_decay_sin"><code class="docutils literal notranslate"><span class="pre">get_decay_sin()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.decay_fourier.get_decay_sin_cumsum"><code class="docutils literal notranslate"><span class="pre">get_decay_sin_cumsum()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.decay_fourier.int_exp_cos_cos"><code class="docutils literal notranslate"><span class="pre">int_exp_cos_cos()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.decay_fourier.int_exp_cos_sin"><code class="docutils literal notranslate"><span class="pre">int_exp_cos_sin()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.decay_fourier.int_exp_sin_cos"><code class="docutils literal notranslate"><span class="pre">int_exp_sin_cos()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.decay_fourier.int_exp_sin_sin"><code class="docutils literal notranslate"><span class="pre">int_exp_sin_sin()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.decay_fourier.period_int_exp_cos_cos"><code class="docutils literal notranslate"><span class="pre">period_int_exp_cos_cos()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.decay_fourier.period_int_exp_cos_sin"><code class="docutils literal notranslate"><span class="pre">period_int_exp_cos_sin()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.decay_fourier.period_int_exp_sin_cos"><code class="docutils literal notranslate"><span class="pre">period_int_exp_sin_cos()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.decay_fourier.period_int_exp_sin_sin"><code class="docutils literal notranslate"><span class="pre">period_int_exp_sin_sin()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-AIGLE.interpolation">AIGLE.interpolation module</a><ul>
+<li><a class="reference internal" href="#AIGLE.interpolation.interpolated_fes_2d"><code class="docutils literal notranslate"><span class="pre">interpolated_fes_2d</span></code></a><ul>
+<li><a class="reference internal" href="#AIGLE.interpolation.interpolated_fes_2d.calc_energy"><code class="docutils literal notranslate"><span class="pre">interpolated_fes_2d.calc_energy()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.interpolation.interpolated_fes_2d.calc_energy_single"><code class="docutils literal notranslate"><span class="pre">interpolated_fes_2d.calc_energy_single()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.interpolation.interpolated_fes_2d.calc_force"><code class="docutils literal notranslate"><span class="pre">interpolated_fes_2d.calc_force()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.interpolation.interpolated_fes_2d.calc_force_batched"><code class="docutils literal notranslate"><span class="pre">interpolated_fes_2d.calc_force_batched()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.interpolation.interpolated_fes_2d.calc_force_single"><code class="docutils literal notranslate"><span class="pre">interpolated_fes_2d.calc_force_single()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.interpolation.interpolated_fes_2d.get_energy_engine"><code class="docutils literal notranslate"><span class="pre">interpolated_fes_2d.get_energy_engine()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.interpolation.interpolated_fes_2d.get_force_engine"><code class="docutils literal notranslate"><span class="pre">interpolated_fes_2d.get_force_engine()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.interpolation.interpolated_fes_2d.interpolate"><code class="docutils literal notranslate"><span class="pre">interpolated_fes_2d.interpolate()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.interpolation.interpolated_fes_2d.scaled_position"><code class="docutils literal notranslate"><span class="pre">interpolated_fes_2d.scaled_position()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-AIGLE.model">AIGLE.model module</a><ul>
+<li><a class="reference internal" href="#AIGLE.model.AIGLE"><code class="docutils literal notranslate"><span class="pre">AIGLE</span></code></a><ul>
+<li><a class="reference internal" href="#AIGLE.model.AIGLE.compute_accumulated_memory_kernel"><code class="docutils literal notranslate"><span class="pre">AIGLE.compute_accumulated_memory_kernel()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.model.AIGLE.compute_mem_coef_from_2FDT"><code class="docutils literal notranslate"><span class="pre">AIGLE.compute_mem_coef_from_2FDT()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.model.AIGLE.compute_memory_kernel"><code class="docutils literal notranslate"><span class="pre">AIGLE.compute_memory_kernel()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.model.AIGLE.get_M_tensor"><code class="docutils literal notranslate"><span class="pre">AIGLE.get_M_tensor()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.model.AIGLE.get_mem_freqs"><code class="docutils literal notranslate"><span class="pre">AIGLE.get_mem_freqs()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.model.AIGLE.get_mem_taus"><code class="docutils literal notranslate"><span class="pre">AIGLE.get_mem_taus()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.model.AIGLE.load"><code class="docutils literal notranslate"><span class="pre">AIGLE.load()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.model.AIGLE.save"><code class="docutils literal notranslate"><span class="pre">AIGLE.save()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-AIGLE.simulator">AIGLE.simulator module</a><ul>
+<li><a class="reference internal" href="#AIGLE.simulator.GLESimulator"><code class="docutils literal notranslate"><span class="pre">GLESimulator</span></code></a><ul>
+<li><a class="reference internal" href="#AIGLE.simulator.GLESimulator.applyConstrainPositions"><code class="docutils literal notranslate"><span class="pre">GLESimulator.applyConstrainPositions()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.simulator.GLESimulator.get_instant_temp"><code class="docutils literal notranslate"><span class="pre">GLESimulator.get_instant_temp()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.simulator.GLESimulator.get_langevin_integrator"><code class="docutils literal notranslate"><span class="pre">GLESimulator.get_langevin_integrator()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.simulator.GLESimulator.set_constraint"><code class="docutils literal notranslate"><span class="pre">GLESimulator.set_constraint()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.simulator.GLESimulator.set_energy_engine"><code class="docutils literal notranslate"><span class="pre">GLESimulator.set_energy_engine()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.simulator.GLESimulator.set_force_engine"><code class="docutils literal notranslate"><span class="pre">GLESimulator.set_force_engine()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.simulator.GLESimulator.set_position"><code class="docutils literal notranslate"><span class="pre">GLESimulator.set_position()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.simulator.GLESimulator.step"><code class="docutils literal notranslate"><span class="pre">GLESimulator.step()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.simulator.GLESimulator.update_memory"><code class="docutils literal notranslate"><span class="pre">GLESimulator.update_memory()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.simulator.GLESimulator.update_noise"><code class="docutils literal notranslate"><span class="pre">GLESimulator.update_noise()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.simulator.GLESimulator.update_state"><code class="docutils literal notranslate"><span class="pre">GLESimulator.update_state()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#AIGLE.simulator.LESimulator"><code class="docutils literal notranslate"><span class="pre">LESimulator</span></code></a><ul>
+<li><a class="reference internal" href="#AIGLE.simulator.LESimulator.applyConstrainPositions"><code class="docutils literal notranslate"><span class="pre">LESimulator.applyConstrainPositions()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.simulator.LESimulator.get_instant_temp"><code class="docutils literal notranslate"><span class="pre">LESimulator.get_instant_temp()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.simulator.LESimulator.set_constraint"><code class="docutils literal notranslate"><span class="pre">LESimulator.set_constraint()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.simulator.LESimulator.set_energy_engine"><code class="docutils literal notranslate"><span class="pre">LESimulator.set_energy_engine()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.simulator.LESimulator.set_force_engine"><code class="docutils literal notranslate"><span class="pre">LESimulator.set_force_engine()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.simulator.LESimulator.set_position"><code class="docutils literal notranslate"><span class="pre">LESimulator.set_position()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.simulator.LESimulator.step"><code class="docutils literal notranslate"><span class="pre">LESimulator.step()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-AIGLE.trainer">AIGLE.trainer module</a><ul>
+<li><a class="reference internal" href="#AIGLE.trainer.Trainer"><code class="docutils literal notranslate"><span class="pre">Trainer</span></code></a><ul>
+<li><a class="reference internal" href="#AIGLE.trainer.Trainer.init_optimizer"><code class="docutils literal notranslate"><span class="pre">Trainer.init_optimizer()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.trainer.Trainer.init_statistics"><code class="docutils literal notranslate"><span class="pre">Trainer.init_statistics()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.trainer.Trainer.save_model"><code class="docutils literal notranslate"><span class="pre">Trainer.save_model()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.trainer.Trainer.set_traj"><code class="docutils literal notranslate"><span class="pre">Trainer.set_traj()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.trainer.Trainer.train"><code class="docutils literal notranslate"><span class="pre">Trainer.train()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.trainer.Trainer.validate"><code class="docutils literal notranslate"><span class="pre">Trainer.validate()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-AIGLE.trajectory">AIGLE.trajectory module</a><ul>
+<li><a class="reference internal" href="#AIGLE.trajectory.Trajectory"><code class="docutils literal notranslate"><span class="pre">Trajectory</span></code></a><ul>
+<li><a class="reference internal" href="#AIGLE.trajectory.Trajectory.compute_Ivcf"><code class="docutils literal notranslate"><span class="pre">Trajectory.compute_Ivcf()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.trajectory.Trajectory.compute_diffusivity_half_grid"><code class="docutils literal notranslate"><span class="pre">Trajectory.compute_diffusivity_half_grid()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.trajectory.Trajectory.compute_msd"><code class="docutils literal notranslate"><span class="pre">Trajectory.compute_msd()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.trajectory.Trajectory.compute_vacf"><code class="docutils literal notranslate"><span class="pre">Trajectory.compute_vacf()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.trajectory.Trajectory.process_kinetics"><code class="docutils literal notranslate"><span class="pre">Trajectory.process_kinetics()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.trajectory.Trajectory.set_calculator"><code class="docutils literal notranslate"><span class="pre">Trajectory.set_calculator()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.trajectory.Trajectory.transform"><code class="docutils literal notranslate"><span class="pre">Trajectory.transform()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-AIGLE.utilities">AIGLE.utilities module</a><ul>
+<li><a class="reference internal" href="#AIGLE.utilities.Corr_t"><code class="docutils literal notranslate"><span class="pre">Corr_t()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.utilities.binned_correlation"><code class="docutils literal notranslate"><span class="pre">binned_correlation()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.utilities.fpt"><code class="docutils literal notranslate"><span class="pre">fpt()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.utilities.get_exact_memory_kernel"><code class="docutils literal notranslate"><span class="pre">get_exact_memory_kernel()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.utilities.moving_average_half_gaussian_torch"><code class="docutils literal notranslate"><span class="pre">moving_average_half_gaussian_torch()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.utilities.np2th"><code class="docutils literal notranslate"><span class="pre">np2th()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.utilities.th2np"><code class="docutils literal notranslate"><span class="pre">th2np()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-AIGLE">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">AIGLETools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">AIGLE package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/references/AIGLE.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="aigle-package">
+<h1>AIGLE package<a class="headerlink" href="#aigle-package" title="Link to this heading">¶</a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="AIGLE.plugins.html">AIGLE.plugins package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="AIGLE.plugins.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="AIGLE.plugins.html#module-AIGLE.plugins.openmm_integrator">AIGLE.plugins.openmm_integrator module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="AIGLE.plugins.html#AIGLE.plugins.openmm_integrator.GLEIntegrator"><code class="docutils literal notranslate"><span class="pre">GLEIntegrator</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="AIGLE.plugins.html#AIGLE.plugins.openmm_integrator.GLEIntegrator.addMemoryComponents"><code class="docutils literal notranslate"><span class="pre">GLEIntegrator.addMemoryComponents()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="AIGLE.plugins.html#AIGLE.plugins.openmm_integrator.GLEIntegrator.addNoiseComponents"><code class="docutils literal notranslate"><span class="pre">GLEIntegrator.addNoiseComponents()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="AIGLE.plugins.html#AIGLE.plugins.openmm_integrator.GLEIntegrator.get_langevin_integrator"><code class="docutils literal notranslate"><span class="pre">GLEIntegrator.get_langevin_integrator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="AIGLE.plugins.html#AIGLE.plugins.openmm_integrator.GLEIntegrator.setIntegrationScheme"><code class="docutils literal notranslate"><span class="pre">GLEIntegrator.setIntegrationScheme()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="AIGLE.plugins.html#AIGLE.plugins.openmm_integrator.GLEIntegrator.updateMemory"><code class="docutils literal notranslate"><span class="pre">GLEIntegrator.updateMemory()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="AIGLE.plugins.html#AIGLE.plugins.openmm_integrator.GLEIntegrator.updateNoise"><code class="docutils literal notranslate"><span class="pre">GLEIntegrator.updateNoise()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="AIGLE.plugins.html#AIGLE.plugins.openmm_integrator.LEIntegrator"><code class="docutils literal notranslate"><span class="pre">LEIntegrator</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="AIGLE.plugins.html#module-AIGLE.plugins">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-AIGLE.decay_fourier">
+<span id="aigle-decay-fourier-module"></span><h2>AIGLE.decay_fourier module<a class="headerlink" href="#module-AIGLE.decay_fourier" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="AIGLE.decay_fourier.get_decay_basis">
+<span class="sig-prename descclassname"><span class="pre">AIGLE.decay_fourier.</span></span><span class="sig-name descname"><span class="pre">get_decay_basis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ws</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/decay_fourier.html#get_decay_basis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.decay_fourier.get_decay_basis" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="AIGLE.decay_fourier.get_decay_cos">
+<span class="sig-prename descclassname"><span class="pre">AIGLE.decay_fourier.</span></span><span class="sig-name descname"><span class="pre">get_decay_cos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/decay_fourier.html#get_decay_cos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.decay_fourier.get_decay_cos" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="AIGLE.decay_fourier.get_decay_cos_cumsum">
+<span class="sig-prename descclassname"><span class="pre">AIGLE.decay_fourier.</span></span><span class="sig-name descname"><span class="pre">get_decay_cos_cumsum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/decay_fourier.html#get_decay_cos_cumsum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.decay_fourier.get_decay_cos_cumsum" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="AIGLE.decay_fourier.get_decay_sin">
+<span class="sig-prename descclassname"><span class="pre">AIGLE.decay_fourier.</span></span><span class="sig-name descname"><span class="pre">get_decay_sin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/decay_fourier.html#get_decay_sin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.decay_fourier.get_decay_sin" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="AIGLE.decay_fourier.get_decay_sin_cumsum">
+<span class="sig-prename descclassname"><span class="pre">AIGLE.decay_fourier.</span></span><span class="sig-name descname"><span class="pre">get_decay_sin_cumsum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/decay_fourier.html#get_decay_sin_cumsum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.decay_fourier.get_decay_sin_cumsum" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="AIGLE.decay_fourier.int_exp_cos_cos">
+<span class="sig-prename descclassname"><span class="pre">AIGLE.decay_fourier.</span></span><span class="sig-name descname"><span class="pre">int_exp_cos_cos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/decay_fourier.html#int_exp_cos_cos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.decay_fourier.int_exp_cos_cos" title="Link to this definition">¶</a></dt>
+<dd><p>indefinite integral of exp(-ax)cos(bx)cos(cx)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="AIGLE.decay_fourier.int_exp_cos_sin">
+<span class="sig-prename descclassname"><span class="pre">AIGLE.decay_fourier.</span></span><span class="sig-name descname"><span class="pre">int_exp_cos_sin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/decay_fourier.html#int_exp_cos_sin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.decay_fourier.int_exp_cos_sin" title="Link to this definition">¶</a></dt>
+<dd><p>indefinite integral of exp(-ax)cos(bx)cos(cx)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="AIGLE.decay_fourier.int_exp_sin_cos">
+<span class="sig-prename descclassname"><span class="pre">AIGLE.decay_fourier.</span></span><span class="sig-name descname"><span class="pre">int_exp_sin_cos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/decay_fourier.html#int_exp_sin_cos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.decay_fourier.int_exp_sin_cos" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="AIGLE.decay_fourier.int_exp_sin_sin">
+<span class="sig-prename descclassname"><span class="pre">AIGLE.decay_fourier.</span></span><span class="sig-name descname"><span class="pre">int_exp_sin_sin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/decay_fourier.html#int_exp_sin_sin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.decay_fourier.int_exp_sin_sin" title="Link to this definition">¶</a></dt>
+<dd><p>indefinite integral of exp(-ax)cos(bx)cos(cx)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="AIGLE.decay_fourier.period_int_exp_cos_cos">
+<span class="sig-prename descclassname"><span class="pre">AIGLE.decay_fourier.</span></span><span class="sig-name descname"><span class="pre">period_int_exp_cos_cos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/decay_fourier.html#period_int_exp_cos_cos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.decay_fourier.period_int_exp_cos_cos" title="Link to this definition">¶</a></dt>
+<dd><p>integral of exp(-ax)cos(bx)cos(cx) from 0 to z (z-&gt;infinity, bz, cz is multiple of 2pi) 
+i.e.
+int_exp_cos_cos(a, b, c, z) - int_exp_cos_cos(a, b, c, 0)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="AIGLE.decay_fourier.period_int_exp_cos_sin">
+<span class="sig-prename descclassname"><span class="pre">AIGLE.decay_fourier.</span></span><span class="sig-name descname"><span class="pre">period_int_exp_cos_sin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/decay_fourier.html#period_int_exp_cos_sin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.decay_fourier.period_int_exp_cos_sin" title="Link to this definition">¶</a></dt>
+<dd><p>integral of exp(-ax)cos(bx)sin(cx) from 0 to z (z-&gt;infinity, bz, cz is multiple of 2pi) 
+i.e.
+int_exp_cos_sin(a, b, c, z) - int_exp_cos_sin(a, b, c, 0)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="AIGLE.decay_fourier.period_int_exp_sin_cos">
+<span class="sig-prename descclassname"><span class="pre">AIGLE.decay_fourier.</span></span><span class="sig-name descname"><span class="pre">period_int_exp_sin_cos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/decay_fourier.html#period_int_exp_sin_cos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.decay_fourier.period_int_exp_sin_cos" title="Link to this definition">¶</a></dt>
+<dd><p>integral of exp(-ax)sin(bx)cos(cx) from 0 to z (z-&gt;infinity, bz, cz is multiple of 2pi)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="AIGLE.decay_fourier.period_int_exp_sin_sin">
+<span class="sig-prename descclassname"><span class="pre">AIGLE.decay_fourier.</span></span><span class="sig-name descname"><span class="pre">period_int_exp_sin_sin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/decay_fourier.html#period_int_exp_sin_sin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.decay_fourier.period_int_exp_sin_sin" title="Link to this definition">¶</a></dt>
+<dd><p>integral of exp(-ax)sin(bx)sin(cx) from 0 to z (z-&gt;infinity, bz, cz is multiple of 2pi) 
+i.e.
+int_exp_sin_sin(a, b, c, z) - int_exp_sin_sin(a, b, c, 0)</p>
+</dd></dl>
+
+</section>
+<section id="module-AIGLE.interpolation">
+<span id="aigle-interpolation-module"></span><h2>AIGLE.interpolation module<a class="headerlink" href="#module-AIGLE.interpolation" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="AIGLE.interpolation.interpolated_fes_2d">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">AIGLE.interpolation.</span></span><span class="sig-name descname"><span class="pre">interpolated_fes_2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fes_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pbc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_torch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/interpolation.html#interpolated_fes_2d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.interpolation.interpolated_fes_2d" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.interpolation.interpolated_fes_2d.calc_energy">
+<span class="sig-name descname"><span class="pre">calc_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/interpolation.html#interpolated_fes_2d.calc_energy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.interpolation.interpolated_fes_2d.calc_energy" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the free energy at given positions r
+Args:</p>
+<blockquote>
+<div><p>r: 1d array of shape (2) or 2d array of shape (batchsize, 2) , the positions</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.interpolation.interpolated_fes_2d.calc_energy_single">
+<span class="sig-name descname"><span class="pre">calc_energy_single</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/interpolation.html#interpolated_fes_2d.calc_energy_single"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.interpolation.interpolated_fes_2d.calc_energy_single" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the free energy at a given position r</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.interpolation.interpolated_fes_2d.calc_force">
+<span class="sig-name descname"><span class="pre">calc_force</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/interpolation.html#interpolated_fes_2d.calc_force"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.interpolation.interpolated_fes_2d.calc_force" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the force at given positions r
+Args:</p>
+<blockquote>
+<div><p>r: 1d array of shape (2) or 2d array of shape (batchsize, 2) , the positions</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.interpolation.interpolated_fes_2d.calc_force_batched">
+<span class="sig-name descname"><span class="pre">calc_force_batched</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/interpolation.html#interpolated_fes_2d.calc_force_batched"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.interpolation.interpolated_fes_2d.calc_force_batched" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the force at given positions r
+Args:</p>
+<blockquote>
+<div><p>r: 2d numpy array of shape (batchsize, 2) , the positions</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.interpolation.interpolated_fes_2d.calc_force_single">
+<span class="sig-name descname"><span class="pre">calc_force_single</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/interpolation.html#interpolated_fes_2d.calc_force_single"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.interpolation.interpolated_fes_2d.calc_force_single" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the force at a given position r
+Args:</p>
+<blockquote>
+<div><p>r: 1d numpy array of shape (2) , the position</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.interpolation.interpolated_fes_2d.get_energy_engine">
+<span class="sig-name descname"><span class="pre">get_energy_engine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transform</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/interpolation.html#interpolated_fes_2d.get_energy_engine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.interpolation.interpolated_fes_2d.get_energy_engine" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.interpolation.interpolated_fes_2d.get_force_engine">
+<span class="sig-name descname"><span class="pre">get_force_engine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transform</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/interpolation.html#interpolated_fes_2d.get_force_engine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.interpolation.interpolated_fes_2d.get_force_engine" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.interpolation.interpolated_fes_2d.interpolate">
+<span class="sig-name descname"><span class="pre">interpolate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift_y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/interpolation.html#interpolated_fes_2d.interpolate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.interpolation.interpolated_fes_2d.interpolate" title="Link to this definition">¶</a></dt>
+<dd><p>Interpolate the value of a 2x2 matrix
+Args:</p>
+<blockquote>
+<div><p>m: 2x2 array, the matrix to be interpolated
+shift_x, shift_y: the shift of the point to the base point</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.interpolation.interpolated_fes_2d.scaled_position">
+<span class="sig-name descname"><span class="pre">scaled_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/interpolation.html#interpolated_fes_2d.scaled_position"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.interpolation.interpolated_fes_2d.scaled_position" title="Link to this definition">¶</a></dt>
+<dd><p>Always impose minimum image convention, no matter if the system is periodic or not
+Returns:</p>
+<blockquote>
+<div><p>relative coordinates in the cell with respect to origin (x0,y0)</p>
+</div></blockquote>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-AIGLE.model">
+<span id="aigle-model-module"></span><h2>AIGLE.model module<a class="headerlink" href="#module-AIGLE.model" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="AIGLE.model.AIGLE">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">AIGLE.model.</span></span><span class="sig-name descname"><span class="pre">AIGLE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ndim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kbT</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ntau</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nfreq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">taus</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/model.html#AIGLE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.model.AIGLE" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>The class for the AIGLE model.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.model.AIGLE.compute_accumulated_memory_kernel">
+<span class="sig-name descname"><span class="pre">compute_accumulated_memory_kernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tgrid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/model.html#AIGLE.compute_accumulated_memory_kernel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.model.AIGLE.compute_accumulated_memory_kernel" title="Link to this definition">¶</a></dt>
+<dd><p>Compute the memory kernel on given time grid.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.model.AIGLE.compute_mem_coef_from_2FDT">
+<span class="sig-name descname"><span class="pre">compute_mem_coef_from_2FDT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">update_buffer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/model.html#AIGLE.compute_mem_coef_from_2FDT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.model.AIGLE.compute_mem_coef_from_2FDT" title="Link to this definition">¶</a></dt>
+<dd><p>Compute the memory kernel coefficients from the parameters of noise generator with second fluctuation dissipation theorem.
+Returns:</p>
+<blockquote>
+<div><p>mem_coef_cos: shape=(ndim, nmodes)
+mem_coef_sin: shape=(ndim, nmodes)</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.model.AIGLE.compute_memory_kernel">
+<span class="sig-name descname"><span class="pre">compute_memory_kernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tgrid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/model.html#AIGLE.compute_memory_kernel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.model.AIGLE.compute_memory_kernel" title="Link to this definition">¶</a></dt>
+<dd><p>Compute the memory kernel on given time grid.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.model.AIGLE.get_M_tensor">
+<span class="sig-name descname"><span class="pre">get_M_tensor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/model.html#AIGLE.get_M_tensor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.model.AIGLE.get_M_tensor" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Returns:</dt><dd><p>M_tensor: shape=(2,2, nmodes, nmodes)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.model.AIGLE.get_mem_freqs">
+<span class="sig-name descname"><span class="pre">get_mem_freqs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/model.html#AIGLE.get_mem_freqs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.model.AIGLE.get_mem_freqs" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Returns:</dt><dd><p>mem_freqs: shape=(ntau*nfreq,)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.model.AIGLE.get_mem_taus">
+<span class="sig-name descname"><span class="pre">get_mem_taus</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/model.html#AIGLE.get_mem_taus"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.model.AIGLE.get_mem_taus" title="Link to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Returns:</dt><dd><p>mem_taus: shape=(ntau*nfreq,)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.model.AIGLE.load">
+<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/model.html#AIGLE.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.model.AIGLE.load" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.model.AIGLE.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/model.html#AIGLE.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.model.AIGLE.save" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-AIGLE.simulator">
+<span id="aigle-simulator-module"></span><h2>AIGLE.simulator module<a class="headerlink" href="#module-AIGLE.simulator" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="AIGLE.simulator.GLESimulator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">AIGLE.simulator.</span></span><span class="sig-name descname"><span class="pre">GLESimulator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ndim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">40</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/simulator.html#GLESimulator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.simulator.GLESimulator" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.simulator.GLESimulator.applyConstrainPositions">
+<span class="sig-name descname"><span class="pre">applyConstrainPositions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/simulator.html#GLESimulator.applyConstrainPositions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.simulator.GLESimulator.applyConstrainPositions" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.simulator.GLESimulator.get_instant_temp">
+<span class="sig-name descname"><span class="pre">get_instant_temp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/simulator.html#GLESimulator.get_instant_temp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.simulator.GLESimulator.get_instant_temp" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the instant temperature in unit of kbT</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.simulator.GLESimulator.get_langevin_integrator">
+<span class="sig-name descname"><span class="pre">get_langevin_integrator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/simulator.html#GLESimulator.get_langevin_integrator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.simulator.GLESimulator.get_langevin_integrator" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.simulator.GLESimulator.set_constraint">
+<span class="sig-name descname"><span class="pre">set_constraint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">position_constraint</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/simulator.html#GLESimulator.set_constraint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.simulator.GLESimulator.set_constraint" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.simulator.GLESimulator.set_energy_engine">
+<span class="sig-name descname"><span class="pre">set_energy_engine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">e_func</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/simulator.html#GLESimulator.set_energy_engine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.simulator.GLESimulator.set_energy_engine" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.simulator.GLESimulator.set_force_engine">
+<span class="sig-name descname"><span class="pre">set_force_engine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f_func</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/simulator.html#GLESimulator.set_force_engine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.simulator.GLESimulator.set_force_engine" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.simulator.GLESimulator.set_position">
+<span class="sig-name descname"><span class="pre">set_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/simulator.html#GLESimulator.set_position"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.simulator.GLESimulator.set_position" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.simulator.GLESimulator.step">
+<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_upper_bound</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/simulator.html#GLESimulator.step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.simulator.GLESimulator.step" title="Link to this definition">¶</a></dt>
+<dd><p>leap frog</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.simulator.GLESimulator.update_memory">
+<span class="sig-name descname"><span class="pre">update_memory</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/simulator.html#GLESimulator.update_memory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.simulator.GLESimulator.update_memory" title="Link to this definition">¶</a></dt>
+<dd><p>Update each memory component and sum them up</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.simulator.GLESimulator.update_noise">
+<span class="sig-name descname"><span class="pre">update_noise</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/simulator.html#GLESimulator.update_noise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.simulator.GLESimulator.update_noise" title="Link to this definition">¶</a></dt>
+<dd><p>Update each noise component and sum them up</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.simulator.GLESimulator.update_state">
+<span class="sig-name descname"><span class="pre">update_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/simulator.html#GLESimulator.update_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.simulator.GLESimulator.update_state" title="Link to this definition">¶</a></dt>
+<dd><p>Update the state of the system</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="AIGLE.simulator.LESimulator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">AIGLE.simulator.</span></span><span class="sig-name descname"><span class="pre">LESimulator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">friction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ndim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kbT</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/simulator.html#LESimulator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.simulator.LESimulator" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.simulator.LESimulator.applyConstrainPositions">
+<span class="sig-name descname"><span class="pre">applyConstrainPositions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/simulator.html#LESimulator.applyConstrainPositions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.simulator.LESimulator.applyConstrainPositions" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.simulator.LESimulator.get_instant_temp">
+<span class="sig-name descname"><span class="pre">get_instant_temp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/simulator.html#LESimulator.get_instant_temp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.simulator.LESimulator.get_instant_temp" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the instant temperature in unit of kbT</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.simulator.LESimulator.set_constraint">
+<span class="sig-name descname"><span class="pre">set_constraint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">position_constraint</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/simulator.html#LESimulator.set_constraint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.simulator.LESimulator.set_constraint" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.simulator.LESimulator.set_energy_engine">
+<span class="sig-name descname"><span class="pre">set_energy_engine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">e_func</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/simulator.html#LESimulator.set_energy_engine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.simulator.LESimulator.set_energy_engine" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.simulator.LESimulator.set_force_engine">
+<span class="sig-name descname"><span class="pre">set_force_engine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f_func</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/simulator.html#LESimulator.set_force_engine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.simulator.LESimulator.set_force_engine" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.simulator.LESimulator.set_position">
+<span class="sig-name descname"><span class="pre">set_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/simulator.html#LESimulator.set_position"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.simulator.LESimulator.set_position" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.simulator.LESimulator.step">
+<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_upper_bound</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/simulator.html#LESimulator.step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.simulator.LESimulator.step" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-AIGLE.trainer">
+<span id="aigle-trainer-module"></span><h2>AIGLE.trainer module<a class="headerlink" href="#module-AIGLE.trainer" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="AIGLE.trainer.Trainer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">AIGLE.trainer.</span></span><span class="sig-name descname"><span class="pre">Trainer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/trainer.html#Trainer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.trainer.Trainer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>The class for fitting the AIGLE to given trajectories of collective variables.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.trainer.Trainer.init_optimizer">
+<span class="sig-name descname"><span class="pre">init_optimizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lr_coef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lr_tau</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.99</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/trainer.html#Trainer.init_optimizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.trainer.Trainer.init_optimizer" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.trainer.Trainer.init_statistics">
+<span class="sig-name descname"><span class="pre">init_statistics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nmax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isotropic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/trainer.html#Trainer.init_statistics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.trainer.Trainer.init_statistics" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.trainer.Trainer.save_model">
+<span class="sig-name descname"><span class="pre">save_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/trainer.html#Trainer.save_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.trainer.Trainer.save_model" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.trainer.Trainer.set_traj">
+<span class="sig-name descname"><span class="pre">set_traj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">traj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/trainer.html#Trainer.set_traj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.trainer.Trainer.set_traj" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.trainer.Trainer.train">
+<span class="sig-name descname"><span class="pre">train</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fit_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">niter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lr_coef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lr_tau</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.99</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./gle_paras'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/trainer.html#Trainer.train"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.trainer.Trainer.train" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.trainer.Trainer.validate">
+<span class="sig-name descname"><span class="pre">validate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val_time</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/trainer.html#Trainer.validate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.trainer.Trainer.validate" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-AIGLE.trajectory">
+<span id="aigle-trajectory-module"></span><h2>AIGLE.trajectory module<a class="headerlink" href="#module-AIGLE.trajectory" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="AIGLE.trajectory.Trajectory">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">AIGLE.trajectory.</span></span><span class="sig-name descname"><span class="pre">Trajectory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">traj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kbT</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/trajectory.html#Trajectory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.trajectory.Trajectory" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>The class for storing and analyzing trajectory of collective variables.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.trajectory.Trajectory.compute_Ivcf">
+<span class="sig-name descname"><span class="pre">compute_Ivcf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skipheads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/trajectory.html#Trajectory.compute_Ivcf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.trajectory.Trajectory.compute_Ivcf" title="Link to this definition">¶</a></dt>
+<dd><p>Compute impulse velocity correlation function.
+Returns:</p>
+<blockquote>
+<div><p>Ivcf: tensor of shape (nmax, <a href="#id1"><span class="problematic" id="id2">*</span></a>), the impulse velocity correlation function</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.trajectory.Trajectory.compute_diffusivity_half_grid">
+<span class="sig-name descname"><span class="pre">compute_diffusivity_half_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_msd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/trajectory.html#Trajectory.compute_diffusivity_half_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.trajectory.Trajectory.compute_diffusivity_half_grid" title="Link to this definition">¶</a></dt>
+<dd><p>Compute the dynamical diffusivity D(t) on half grid.
+Args:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>from_msd: bool, whether to compute the diffusivity by taking the time derivative of the mean square displacement, </dt><dd><p>or by integrating the velocity autocorrelation function.</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>diffusivity: tensor of shape (nmax-1, <a href="#id3"><span class="problematic" id="id4">*</span></a>), the dynamical diffusivity D(t)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.trajectory.Trajectory.compute_msd">
+<span class="sig-name descname"><span class="pre">compute_msd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skipheads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/trajectory.html#Trajectory.compute_msd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.trajectory.Trajectory.compute_msd" title="Link to this definition">¶</a></dt>
+<dd><p>Compute mean square displacement.
+Returns:</p>
+<blockquote>
+<div><p>msd: tensor of shape (nmax, <a href="#id5"><span class="problematic" id="id6">*</span></a>), the mean square displacement</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.trajectory.Trajectory.compute_vacf">
+<span class="sig-name descname"><span class="pre">compute_vacf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skipheads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/trajectory.html#Trajectory.compute_vacf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.trajectory.Trajectory.compute_vacf" title="Link to this definition">¶</a></dt>
+<dd><p>Compute velocity autocorrelation function.
+Returns:</p>
+<blockquote>
+<div><p>vacf: tensor of shape (nmax, <a href="#id7"><span class="problematic" id="id8">*</span></a>), the velocity autocorrelation function</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.trajectory.Trajectory.process_kinetics">
+<span class="sig-name descname"><span class="pre">process_kinetics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smooth_window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/trajectory.html#Trajectory.process_kinetics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.trajectory.Trajectory.process_kinetics" title="Link to this definition">¶</a></dt>
+<dd><p>Compute and store position, velocity, acceleration on the same grid with finite difference.
+Compute also the effective mass with equipartition theorem.
+Args:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>transform: bool, whether to transform the trajectory with an orthogonal rotation matrix, </dt><dd><p>to remove the instantaneous velocity correlation between different components.</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.trajectory.Trajectory.set_calculator">
+<span class="sig-name descname"><span class="pre">set_calculator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">calc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/trajectory.html#Trajectory.set_calculator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.trajectory.Trajectory.set_calculator" title="Link to this definition">¶</a></dt>
+<dd><p>Set the calculator for computing energy and forces.
+calc.calc_force( traj: (nframes, ndim) ) should return the force
+calc.calc_energy( traj: (nframes, ndim) ) should return the energy
+Args:</p>
+<blockquote>
+<div><p>calc: object, the calculator</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.trajectory.Trajectory.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/trajectory.html#Trajectory.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.trajectory.Trajectory.transform" title="Link to this definition">¶</a></dt>
+<dd><p>Transform a 2D/3D tensor with an orthogonal rotation matrix.
+Args:</p>
+<blockquote>
+<div><p>x: tensor, (nframes, ndim, <a href="#id9"><span class="problematic" id="id10">*</span></a>)
+eigM: tensor, (ndim, ndim), the orthogonal rotation matrix</p>
+</div></blockquote>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-AIGLE.utilities">
+<span id="aigle-utilities-module"></span><h2>AIGLE.utilities module<a class="headerlink" href="#module-AIGLE.utilities" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="AIGLE.utilities.Corr_t">
+<span class="sig-prename descclassname"><span class="pre">AIGLE.utilities.</span></span><span class="sig-name descname"><span class="pre">Corr_t</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/utilities.html#Corr_t"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.utilities.Corr_t" title="Link to this definition">¶</a></dt>
+<dd><p>“x(0)y(t)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="AIGLE.utilities.binned_correlation">
+<span class="sig-prename descclassname"><span class="pre">AIGLE.utilities.</span></span><span class="sig-name descname"><span class="pre">binned_correlation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nbins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin_indices</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/utilities.html#binned_correlation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.utilities.binned_correlation" title="Link to this definition">¶</a></dt>
+<dd><p>The conditional correlation: f(r, n) = &lt;x1(i)x2(i-n)&gt;*delta(x1(i)-r)
+Args:</p>
+<blockquote>
+<div><p>shift: n, integer
+x1: array or tensor, (npoints)
+x2: array or tensor, (npoints)
+bin_indices: array or tensor, (npoints). The bin index for each element of x1</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>binned_corr: f(r, shift) for r value given by the bins, shape=(nbins)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="AIGLE.utilities.fpt">
+<span class="sig-prename descclassname"><span class="pre">AIGLE.utilities.</span></span><span class="sig-name descname"><span class="pre">fpt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">traj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/utilities.html#fpt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.utilities.fpt" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="AIGLE.utilities.get_exact_memory_kernel">
+<span class="sig-prename descclassname"><span class="pre">AIGLE.utilities.</span></span><span class="sig-name descname"><span class="pre">get_exact_memory_kernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_corr_vtv0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_corr_qtv0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/utilities.html#get_exact_memory_kernel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.utilities.get_exact_memory_kernel" title="Link to this definition">¶</a></dt>
+<dd><p>get the exact result of the memory kernel through direct matrix inversion</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="AIGLE.utilities.moving_average_half_gaussian_torch">
+<span class="sig-prename descclassname"><span class="pre">AIGLE.utilities.</span></span><span class="sig-name descname"><span class="pre">moving_average_half_gaussian_torch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">truncate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/utilities.html#moving_average_half_gaussian_torch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.utilities.moving_average_half_gaussian_torch" title="Link to this definition">¶</a></dt>
+<dd><p>smooth over the first axis of a n-dimensional tensor with a half gaussian kernel
+Args:</p>
+<blockquote>
+<div><p>a: tensor, (nframes,  <a href="#id11"><span class="problematic" id="id12">*</span></a>)
+sigma: float, the standard deviation of the gaussian kernel
+truncate: integer, the truncation of the gaussian kernel</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="AIGLE.utilities.np2th">
+<span class="sig-prename descclassname"><span class="pre">AIGLE.utilities.</span></span><span class="sig-name descname"><span class="pre">np2th</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/utilities.html#np2th"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.utilities.np2th" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="AIGLE.utilities.th2np">
+<span class="sig-prename descclassname"><span class="pre">AIGLE.utilities.</span></span><span class="sig-name descname"><span class="pre">th2np</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/utilities.html#th2np"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.utilities.th2np" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-AIGLE">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-AIGLE" title="Link to this heading">¶</a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Pinchen Xie.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

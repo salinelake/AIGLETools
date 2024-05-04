@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AIGLE.decay_fourier &mdash; AIGLETools 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/documentation_options.js?v=2709fde1"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            AIGLETools
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">AIGLETools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">AIGLE.decay_fourier</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for AIGLE.decay_fourier</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">torch</span> <span class="k">as</span> <span class="nn">th</span>
+
+<div class="viewcode-block" id="get_decay_sin">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.decay_fourier.get_decay_sin">[docs]</a>
+<span class="k">def</span> <span class="nf">get_decay_sin</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">w</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="o">/</span><span class="n">tau</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="o">/</span><span class="n">tau</span><span class="p">)</span> <span class="o">*</span> <span class="n">th</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span>
+    <span class="c1"># norm = (base**2).sum()**0.5</span>
+    <span class="c1"># base = base / norm</span>
+    <span class="k">return</span> <span class="n">base</span></div>
+
+
+<div class="viewcode-block" id="get_decay_cos">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.decay_fourier.get_decay_cos">[docs]</a>
+<span class="k">def</span> <span class="nf">get_decay_cos</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">w</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="o">/</span><span class="n">tau</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="o">/</span><span class="n">tau</span><span class="p">)</span> <span class="o">*</span> <span class="n">th</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span>
+    <span class="c1"># norm = (base**2).sum()**0.5</span>
+    <span class="c1"># base = base / norm</span>
+    <span class="k">return</span> <span class="n">base</span></div>
+
+
+<div class="viewcode-block" id="get_decay_cos_cumsum">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.decay_fourier.get_decay_cos_cumsum">[docs]</a>
+<span class="k">def</span> <span class="nf">get_decay_cos_cumsum</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">w</span><span class="p">):</span>
+    <span class="n">sin</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">sin</span> <span class="k">if</span> <span class="n">th</span><span class="o">.</span><span class="n">is_tensor</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span>
+    <span class="n">cos</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">cos</span> <span class="k">if</span> <span class="n">th</span><span class="o">.</span><span class="n">is_tensor</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span>
+    <span class="n">exp</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">exp</span> <span class="k">if</span> <span class="n">th</span><span class="o">.</span><span class="n">is_tensor</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span>
+    
+    <span class="n">result</span> <span class="o">=</span> <span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="o">/</span><span class="n">tau</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">w</span> <span class="o">*</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="o">/</span><span class="n">tau</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">w</span><span class="o">*</span><span class="n">x</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span><span class="o">/</span><span class="n">tau</span>
+    <span class="n">result</span> <span class="o">/=</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">tau</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">w</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="get_decay_sin_cumsum">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.decay_fourier.get_decay_sin_cumsum">[docs]</a>
+<span class="k">def</span> <span class="nf">get_decay_sin_cumsum</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">w</span><span class="p">):</span>
+    <span class="n">sin</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">sin</span> <span class="k">if</span> <span class="n">th</span><span class="o">.</span><span class="n">is_tensor</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span>
+    <span class="n">cos</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">cos</span> <span class="k">if</span> <span class="n">th</span><span class="o">.</span><span class="n">is_tensor</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span>
+    <span class="n">exp</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">exp</span> <span class="k">if</span> <span class="n">th</span><span class="o">.</span><span class="n">is_tensor</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span>
+    
+    <span class="n">result</span> <span class="o">=</span> <span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="o">/</span><span class="n">tau</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">tau</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">w</span> <span class="o">*</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">w</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">w</span><span class="o">*</span><span class="n">x</span><span class="p">))</span> <span class="o">-</span> <span class="n">w</span>
+    <span class="n">result</span> <span class="o">/=</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">tau</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">w</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="get_decay_basis">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.decay_fourier.get_decay_basis">[docs]</a>
+<span class="k">def</span> <span class="nf">get_decay_basis</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">tau</span><span class="p">,</span> <span class="n">ws</span> <span class="p">):</span>
+    <span class="c1"># basis_cos = np.exp(-x/tau)[None,:] * np.cos(ws[:,None] * x[None,:])</span>
+    <span class="c1"># basis_sin = np.exp(-x/tau)[None,:] * np.sin(ws[1:,None] * x[None,:])</span>
+    <span class="c1"># return np.concatenate([basis_cos, basis_sin], 0)</span>
+    <span class="n">basis</span> <span class="o">=</span> <span class="p">[</span><span class="n">get_decay_cos</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">tau</span><span class="p">,</span><span class="n">w</span><span class="p">)</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">ws</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">get_decay_sin</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">tau</span><span class="p">,</span><span class="n">w</span><span class="p">)</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">ws</span> <span class="p">]</span>
+    <span class="c1"># basis = [get_decay_cos(x,tau,w) for w in ws] + [get_decay_sin(x,tau,w) for w in ws]</span>
+    <span class="n">nbasis</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">basis</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">basis</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">th</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span><span class="n">basis</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">nbasis</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+     
+<div class="viewcode-block" id="int_exp_cos_cos">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.decay_fourier.int_exp_cos_cos">[docs]</a>
+<span class="k">def</span> <span class="nf">int_exp_cos_cos</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    indefinite integral of exp(-ax)cos(bx)cos(cx)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sin</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">sin</span> <span class="k">if</span> <span class="n">th</span><span class="o">.</span><span class="n">is_tensor</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span>
+    <span class="n">cos</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">cos</span> <span class="k">if</span> <span class="n">th</span><span class="o">.</span><span class="n">is_tensor</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span>
+    <span class="n">exp</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">exp</span> <span class="k">if</span> <span class="n">th</span><span class="o">.</span><span class="n">is_tensor</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span>
+    
+    <span class="n">result</span>  <span class="o">=</span> <span class="p">((</span><span class="n">b</span><span class="o">-</span><span class="n">c</span><span class="p">)</span> <span class="o">*</span> <span class="n">sin</span><span class="p">((</span><span class="n">b</span><span class="o">-</span><span class="n">c</span><span class="p">)</span><span class="o">*</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">a</span> <span class="o">*</span> <span class="n">cos</span><span class="p">((</span><span class="n">b</span><span class="o">-</span><span class="n">c</span><span class="p">)</span><span class="o">*</span><span class="n">x</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="p">(</span><span class="n">b</span><span class="o">-</span><span class="n">c</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">+=</span> <span class="p">((</span><span class="n">b</span><span class="o">+</span><span class="n">c</span><span class="p">)</span> <span class="o">*</span> <span class="n">sin</span><span class="p">((</span><span class="n">b</span><span class="o">+</span><span class="n">c</span><span class="p">)</span><span class="o">*</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">a</span> <span class="o">*</span> <span class="n">cos</span><span class="p">((</span><span class="n">b</span><span class="o">+</span><span class="n">c</span><span class="p">)</span><span class="o">*</span><span class="n">x</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="p">(</span><span class="n">b</span><span class="o">+</span><span class="n">c</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">*=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">a</span><span class="o">*</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="period_int_exp_cos_cos">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.decay_fourier.period_int_exp_cos_cos">[docs]</a>
+<span class="k">def</span> <span class="nf">period_int_exp_cos_cos</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    integral of exp(-ax)cos(bx)cos(cx) from 0 to z (z-&gt;infinity, bz, cz is multiple of 2pi) </span>
+<span class="sd">    i.e.</span>
+<span class="sd">    int_exp_cos_cos(a, b, c, z) - int_exp_cos_cos(a, b, c, 0)</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="n">result</span>  <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="p">(</span><span class="n">b</span><span class="o">-</span><span class="n">c</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">+=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="p">(</span><span class="n">b</span><span class="o">+</span><span class="n">c</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">*=</span>  <span class="mf">0.5</span> <span class="o">*</span> <span class="n">a</span> 
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="int_exp_cos_sin">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.decay_fourier.int_exp_cos_sin">[docs]</a>
+<span class="k">def</span> <span class="nf">int_exp_cos_sin</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    indefinite integral of exp(-ax)cos(bx)cos(cx)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sin</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">sin</span> <span class="k">if</span> <span class="n">th</span><span class="o">.</span><span class="n">is_tensor</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span>
+    <span class="n">cos</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">cos</span> <span class="k">if</span> <span class="n">th</span><span class="o">.</span><span class="n">is_tensor</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span>
+    <span class="n">exp</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">exp</span> <span class="k">if</span> <span class="n">th</span><span class="o">.</span><span class="n">is_tensor</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span>
+    
+    <span class="n">result</span>  <span class="o">=</span> <span class="p">(</span><span class="n">a</span> <span class="o">*</span> <span class="n">sin</span><span class="p">((</span><span class="n">b</span><span class="o">-</span><span class="n">c</span><span class="p">)</span><span class="o">*</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">b</span><span class="o">-</span><span class="n">c</span><span class="p">)</span> <span class="o">*</span> <span class="n">cos</span><span class="p">((</span><span class="n">b</span><span class="o">-</span><span class="n">c</span><span class="p">)</span><span class="o">*</span><span class="n">x</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="p">(</span><span class="n">b</span><span class="o">-</span><span class="n">c</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">-=</span> <span class="p">(</span><span class="n">a</span> <span class="o">*</span> <span class="n">sin</span><span class="p">((</span><span class="n">b</span><span class="o">+</span><span class="n">c</span><span class="p">)</span><span class="o">*</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">b</span><span class="o">+</span><span class="n">c</span><span class="p">)</span> <span class="o">*</span> <span class="n">cos</span><span class="p">((</span><span class="n">b</span><span class="o">+</span><span class="n">c</span><span class="p">)</span><span class="o">*</span><span class="n">x</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="p">(</span><span class="n">b</span><span class="o">+</span><span class="n">c</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">*=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">a</span><span class="o">*</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="period_int_exp_cos_sin">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.decay_fourier.period_int_exp_cos_sin">[docs]</a>
+<span class="k">def</span> <span class="nf">period_int_exp_cos_sin</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    integral of exp(-ax)cos(bx)sin(cx) from 0 to z (z-&gt;infinity, bz, cz is multiple of 2pi) </span>
+<span class="sd">    i.e.</span>
+<span class="sd">    int_exp_cos_sin(a, b, c, z) - int_exp_cos_sin(a, b, c, 0)</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="n">result</span>  <span class="o">=</span> <span class="o">-</span> <span class="p">(</span><span class="n">b</span><span class="o">-</span><span class="n">c</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="p">(</span><span class="n">b</span><span class="o">-</span><span class="n">c</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">+=</span> <span class="o">+</span> <span class="p">(</span><span class="n">b</span><span class="o">+</span><span class="n">c</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="p">(</span><span class="n">b</span><span class="o">+</span><span class="n">c</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">*=</span>  <span class="mf">0.5</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="int_exp_sin_cos">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.decay_fourier.int_exp_sin_cos">[docs]</a>
+<span class="k">def</span> <span class="nf">int_exp_sin_cos</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">int_exp_cos_sin</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">x</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="period_int_exp_sin_cos">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.decay_fourier.period_int_exp_sin_cos">[docs]</a>
+<span class="k">def</span> <span class="nf">period_int_exp_sin_cos</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    integral of exp(-ax)sin(bx)cos(cx) from 0 to z (z-&gt;infinity, bz, cz is multiple of 2pi) </span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="k">return</span> <span class="n">period_int_exp_cos_sin</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">b</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="int_exp_sin_sin">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.decay_fourier.int_exp_sin_sin">[docs]</a>
+<span class="k">def</span> <span class="nf">int_exp_sin_sin</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    indefinite integral of exp(-ax)cos(bx)cos(cx)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sin</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">sin</span> <span class="k">if</span> <span class="n">th</span><span class="o">.</span><span class="n">is_tensor</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span>
+    <span class="n">cos</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">cos</span> <span class="k">if</span> <span class="n">th</span><span class="o">.</span><span class="n">is_tensor</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span>
+    <span class="n">exp</span> <span class="o">=</span> <span class="n">th</span><span class="o">.</span><span class="n">exp</span> <span class="k">if</span> <span class="n">th</span><span class="o">.</span><span class="n">is_tensor</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span>
+    
+    <span class="n">result</span>  <span class="o">=</span> <span class="p">((</span><span class="n">b</span><span class="o">-</span><span class="n">c</span><span class="p">)</span> <span class="o">*</span> <span class="n">sin</span><span class="p">((</span><span class="n">b</span><span class="o">-</span><span class="n">c</span><span class="p">)</span><span class="o">*</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">a</span> <span class="o">*</span> <span class="n">cos</span><span class="p">((</span><span class="n">b</span><span class="o">-</span><span class="n">c</span><span class="p">)</span><span class="o">*</span><span class="n">x</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="p">(</span><span class="n">b</span><span class="o">-</span><span class="n">c</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">+=</span> <span class="p">(</span><span class="n">a</span> <span class="o">*</span> <span class="n">cos</span><span class="p">((</span><span class="n">b</span><span class="o">+</span><span class="n">c</span><span class="p">)</span><span class="o">*</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">b</span><span class="o">+</span><span class="n">c</span><span class="p">)</span> <span class="o">*</span> <span class="n">sin</span><span class="p">((</span><span class="n">b</span><span class="o">+</span><span class="n">c</span><span class="p">)</span><span class="o">*</span><span class="n">x</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="p">(</span><span class="n">b</span><span class="o">+</span><span class="n">c</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">*=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">a</span><span class="o">*</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="period_int_exp_sin_sin">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.decay_fourier.period_int_exp_sin_sin">[docs]</a>
+<span class="k">def</span> <span class="nf">period_int_exp_sin_sin</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    integral of exp(-ax)sin(bx)sin(cx) from 0 to z (z-&gt;infinity, bz, cz is multiple of 2pi) </span>
+<span class="sd">    i.e.</span>
+<span class="sd">    int_exp_sin_sin(a, b, c, z) - int_exp_sin_sin(a, b, c, 0)</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="n">result</span>  <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="p">(</span><span class="n">b</span><span class="o">-</span><span class="n">c</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">-=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="p">(</span><span class="n">b</span><span class="o">+</span><span class="n">c</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">*=</span>  <span class="mf">0.5</span> <span class="o">*</span> <span class="n">a</span> 
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+
+
+<span class="c1">####################   not TORCH compatible, archived #######################3</span>
+    
+<span class="c1"># def decay_cos_kernel(tau, omega, cutoff, dt ):</span>
+<span class="c1">#     mesh_size = int(tau/dt * cutoff)</span>
+<span class="c1">#     t_mesh = (np.arange(mesh_size)+0.5) * dt</span>
+<span class="c1">#     kernel = np.exp(-t_mesh/tau) * np.cos(omega * t_mesh)</span>
+<span class="c1">#     return kernel</span>
+
+<span class="c1"># def decay_sin_kernel(tau, omega, cutoff, dt ):</span>
+<span class="c1">#     mesh_size = int(tau/dt * cutoff)</span>
+<span class="c1">#     t_mesh = (np.arange(mesh_size)+0.5) * dt</span>
+<span class="c1">#     kernel = np.exp(-t_mesh/tau) * np.sin(omega * t_mesh)</span>
+<span class="c1">#     return kernel</span>
+
+<span class="c1"># def get_xi_process(white_noise, tau, omega, dt, kernel_cutoff=5):</span>
+<span class="c1">#     ckernel = decay_cos_kernel(tau, omega, kernel_cutoff, dt)</span>
+<span class="c1">#     skernel = decay_sin_kernel(tau, omega, kernel_cutoff, dt)</span>
+<span class="c1">#     xi_cos = np.convolve(white_noise, ckernel, mode=&#39;valid&#39;)</span>
+<span class="c1">#     xi_sin = np.convolve(white_noise, skernel, mode=&#39;valid&#39;)</span>
+<span class="c1">#     return xi_cos, xi_sin</span>
+
+<span class="c1"># def get_xi_process_spectrum(tau, ws, dt,  length, cutoff=5):</span>
+<span class="c1">#     &#39;&#39;&#39;</span>
+<span class="c1">#     Args:</span>
+<span class="c1">#         tau: the lifetime of the xi process</span>
+<span class="c1">#         ws: the frequencies of the basis</span>
+<span class="c1">#         dt: the time step of the xi process</span>
+<span class="c1">#         length: the length of the xi process</span>
+<span class="c1">#         cutoff: the cutoff of the kernel</span>
+<span class="c1">#     returns</span>
+<span class="c1">#         xi_cos_wt: shape (nbasis, nstep)</span>
+<span class="c1">#         xi_sin_wt: shape (nbasis, nstep)</span>
+<span class="c1">#     &#39;&#39;&#39;</span>
+<span class="c1">#     ## generate the white noise array</span>
+<span class="c1">#     nstep = int(length / dt)</span>
+<span class="c1">#     white_noise = np.random.normal(0, dt**0.5, nstep)  </span>
+<span class="c1">#     ### generate the xi_process</span>
+<span class="c1">#     xi_cos_wt = []</span>
+<span class="c1">#     xi_sin_wt = []</span>
+<span class="c1">#     for w in ws:</span>
+<span class="c1">#         xi_cos, xi_sin = get_xi_process(white_noise, tau, w, dt, cutoff)</span>
+<span class="c1">#         xi_cos_wt.append(xi_cos)</span>
+<span class="c1">#         xi_sin_wt.append(xi_sin)    </span>
+<span class="c1">#     return np.array(xi_cos_wt) , np.array(xi_sin_wt)</span>
+ 
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Pinchen Xie.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

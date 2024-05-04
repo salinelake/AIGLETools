@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AIGLE.plugins.openmm_integrator &mdash; AIGLETools 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/documentation_options.js?v=2709fde1"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            AIGLETools
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">AIGLETools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">AIGLE.plugins.openmm_integrator</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for AIGLE.plugins.openmm_integrator</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">openmm</span>
+<span class="kn">from</span> <span class="nn">openmm</span> <span class="kn">import</span> <span class="n">unit</span>
+<span class="c1"># from utilities import *</span>
+
+
+
+<div class="viewcode-block" id="LEIntegrator">
+<a class="viewcode-back" href="../../../references/AIGLE.plugins.html#AIGLE.plugins.openmm_integrator.LEIntegrator">[docs]</a>
+<span class="k">class</span> <span class="nc">LEIntegrator</span><span class="p">(</span><span class="n">openmm</span><span class="o">.</span><span class="n">CustomIntegrator</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The integrator for langevin equations (LE): ma = F - friction*v + white_noise</span>
+<span class="sd">    For each particle, assume the memory and noise effects are isotropic.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span>  <span class="n">friction</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">LEIntegrator</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">timestep</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            temperature (float or openmm.unit.Quantity): in unit of Kelvin</span>
+<span class="sd">            timestep (float  or openmm.unit.Quantity): in unit of picosecond</span>
+<span class="sd">            friction (numpy.array): shape=(nparticle), (value only) in unit of 1/picosecond</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">## check inputs</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">timestep</span><span class="p">)</span>  <span class="ow">is</span> <span class="n">unit</span><span class="o">.</span><span class="n">Quantity</span><span class="p">:</span>
+            <span class="n">dt</span> <span class="o">=</span> <span class="n">timestep</span><span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span><span class="n">unit</span><span class="o">.</span><span class="n">picosecond</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dt</span> <span class="o">=</span> <span class="n">timestep</span>
+        <span class="n">kb</span> <span class="o">=</span> <span class="n">unit</span><span class="o">.</span><span class="n">BOLTZMANN_CONSTANT_kB</span> <span class="o">*</span> <span class="n">unit</span><span class="o">.</span><span class="n">AVOGADRO_CONSTANT_NA</span> 
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">temperature</span><span class="p">)</span> <span class="ow">is</span> <span class="n">unit</span><span class="o">.</span><span class="n">Quantity</span><span class="p">:</span>
+            <span class="n">kbT</span> <span class="o">=</span> <span class="p">(</span><span class="n">kb</span><span class="o">*</span><span class="n">temperature</span><span class="p">)</span><span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span><span class="n">unit</span><span class="o">.</span><span class="n">kilojoule_per_mole</span><span class="p">)</span>  <span class="c1">#kJ/mol</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">kbT</span> <span class="o">=</span> <span class="p">(</span><span class="n">kb</span><span class="o">*</span><span class="n">temperature</span><span class="o">*</span><span class="n">unit</span><span class="o">.</span><span class="n">kelvin</span><span class="p">)</span><span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span><span class="n">unit</span><span class="o">.</span><span class="n">kilojoule_per_mole</span><span class="p">)</span>  <span class="c1">#kJ/mol</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">friction</span><span class="p">)</span> <span class="ow">is</span> <span class="n">unit</span><span class="o">.</span><span class="n">Quantity</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">friction</span> <span class="o">=</span> <span class="n">friction</span><span class="o">.</span><span class="n">value_in_unit</span><span class="p">(</span><span class="n">unit</span><span class="o">.</span><span class="n">picosecond</span><span class="o">**-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">friction</span> <span class="o">=</span> <span class="n">friction</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">friction</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">friction</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span><span class="mi">3</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="c1">## (nparticle, 3)</span>
+        <span class="c1">## set variables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addPerDofVariable</span><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setPerDofVariableByName</span><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">friction</span><span class="o">*</span><span class="n">dt</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addPerDofVariable</span><span class="p">(</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setPerDofVariableByName</span><span class="p">(</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">friction</span><span class="o">*</span><span class="n">dt</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addGlobalVariable</span><span class="p">(</span><span class="s2">&quot;_kT&quot;</span><span class="p">,</span> <span class="n">kbT</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addPerDofVariable</span><span class="p">(</span><span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        
+        <span class="c1">## set integration scheme</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addUpdateContextState</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addConstrainVelocities</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addComputePerDof</span><span class="p">(</span><span class="s2">&quot;v&quot;</span><span class="p">,</span> <span class="s2">&quot;v + dt*f/m&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addComputePerDof</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;x + 0.5*dt*v&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addComputePerDof</span><span class="p">(</span><span class="s2">&quot;v&quot;</span><span class="p">,</span> <span class="s2">&quot;a*v + gaussian*b*sqrt(_kT/m)&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addComputePerDof</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;x + 0.5*dt*v&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addComputePerDof</span><span class="p">(</span><span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addConstrainPositions</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addComputePerDof</span><span class="p">(</span><span class="s2">&quot;v&quot;</span><span class="p">,</span> <span class="s2">&quot;v + (x-x1)/dt&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="GLEIntegrator">
+<a class="viewcode-back" href="../../../references/AIGLE.plugins.html#AIGLE.plugins.openmm_integrator.GLEIntegrator">[docs]</a>
+<span class="k">class</span> <span class="nc">GLEIntegrator</span><span class="p">(</span><span class="n">openmm</span><span class="o">.</span><span class="n">CustomIntegrator</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The integrator for generalized langevin equations (GLE): ma = F + \int K(t-s) v(s) ds + n(t)</span>
+<span class="sd">    For each particle, assume the memory and noise effects are isotropic.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">timestep</span> <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            config: a dictionary containing the GLE parameters</span>
+<span class="sd">            timestep (float): in unit of picosecond</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">GLEIntegrator</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">timestep</span><span class="p">)</span>
+        
+        <span class="c1">################ Loading GLE Parameters ################</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">taus</span> <span class="o">=</span>  <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;taus&#39;</span><span class="p">])</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">alphas</span> <span class="o">=</span>  <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;freqs&#39;</span><span class="p">])</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">nmodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alphas</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1">## constanst for integration</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">z0_cos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">timestep</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">taus</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">timestep</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">alphas</span><span class="p">)</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">z0_sin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">timestep</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">taus</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">timestep</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">alphas</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">z1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span> <span class="n">timestep</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">taus</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">timestep</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">alphas</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">z2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span> <span class="n">timestep</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">taus</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">timestep</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">alphas</span><span class="p">)</span>
+
+        <span class="c1">## memory and noise coefficients</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mem_coef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;mem_coef&#39;</span><span class="p">])</span> <span class="c1">## (ndim, nmodes*2)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">noise_coef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;noise_coef&#39;</span><span class="p">])</span> <span class="c1">## (ndim, nmodes*2)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nparticle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mem_coef</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">mem_coef</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nparticle</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmodes</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_coef</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nparticle</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmodes</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span>       
+
+        <span class="c1">################ Add Variables in OPENMM ################</span>
+        <span class="c1">## add CustomIntegrator global variables</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nmodes</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addGlobalVariable</span><span class="p">(</span><span class="s1">&#39;Taus</span><span class="si">{:d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">taus</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addGlobalVariable</span><span class="p">(</span><span class="s1">&#39;Freqs</span><span class="si">{:d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">alphas</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addGlobalVariable</span><span class="p">(</span><span class="s1">&#39;Z0Cos</span><span class="si">{:d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">z0_cos</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addGlobalVariable</span><span class="p">(</span><span class="s1">&#39;Z0Sin</span><span class="si">{:d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">z0_sin</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addGlobalVariable</span><span class="p">(</span><span class="s1">&#39;Z1</span><span class="si">{:d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">z1</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addGlobalVariable</span><span class="p">(</span><span class="s1">&#39;Z2</span><span class="si">{:d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">z2</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        
+        <span class="c1">## add CustomIntegrator per-Dof Variables</span>
+        <span class="c1">## assuming isotropic memery effects, replicate the memory&amp;noise coefficients for x,y,z</span>
+        <span class="n">_mem_coef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mem_coef</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nparticle</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">_noise_coef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">noise_coef</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nparticle</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addPerDofVariable</span><span class="p">(</span><span class="s1">&#39;Fv&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>  <span class="c1">## total memory force</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addMemoryComponents</span><span class="p">(</span> <span class="n">_mem_coef</span><span class="p">[:,:,:</span><span class="bp">self</span><span class="o">.</span><span class="n">nmodes</span><span class="p">],</span> <span class="n">_mem_coef</span><span class="p">[:,:,</span><span class="bp">self</span><span class="o">.</span><span class="n">nmodes</span><span class="p">:])</span> <span class="c1">## components of memory force</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addPerDofVariable</span><span class="p">(</span><span class="s1">&#39;Noise&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span> <span class="c1">## total noise</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addNoiseComponents</span><span class="p">(</span> <span class="n">_noise_coef</span><span class="p">[:,:,:</span><span class="bp">self</span><span class="o">.</span><span class="n">nmodes</span><span class="p">],</span> <span class="n">_noise_coef</span><span class="p">[:,:,</span><span class="bp">self</span><span class="o">.</span><span class="n">nmodes</span><span class="p">:])</span> <span class="c1">## components of noise</span>
+        
+        <span class="c1">## buffer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addPerDofVariable</span><span class="p">(</span><span class="s1">&#39;BufferCos&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addPerDofVariable</span><span class="p">(</span><span class="s1">&#39;BufferSin&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addPerDofVariable</span><span class="p">(</span><span class="s1">&#39;whiteNoise&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addPerDofVariable</span><span class="p">(</span><span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        
+        <span class="c1">## set integration scheme</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setIntegrationScheme</span><span class="p">()</span>
+
+<div class="viewcode-block" id="GLEIntegrator.get_langevin_integrator">
+<a class="viewcode-back" href="../../../references/AIGLE.plugins.html#AIGLE.plugins.openmm_integrator.GLEIntegrator.get_langevin_integrator">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_langevin_integrator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span>  <span class="n">timestep</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            temperature (float): in unit of Kelvin</span>
+<span class="sd">            timestep (float): in unit of picosecond</span>
+<span class="sd">            epsilon (float): the minimum value of the friction coefficient, in unit of 1/picosecond. </span>
+<span class="sd">                            epsilon should be positive to avoid negative friction coefficient derived from GLE.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            a Langevin Equation integrator with the instantaneous friction derived from the GLE integrator</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">## get parameters</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">taus</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alphas</span>
+        <span class="n">mem_coef_cos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mem_coef</span><span class="p">[:,:</span><span class="bp">self</span><span class="o">.</span><span class="n">nmodes</span><span class="p">]</span>
+        <span class="n">mem_coef_sin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mem_coef</span><span class="p">[:,</span><span class="bp">self</span><span class="o">.</span><span class="n">nmodes</span><span class="p">:]</span>
+        
+        <span class="c1">## compute the friction coefficient</span>
+        <span class="n">friction_cos</span> <span class="o">=</span> <span class="n">a</span> <span class="o">/</span> <span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">friction_sin</span> <span class="o">=</span> <span class="n">b</span> <span class="o">/</span> <span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">friction_tot</span> <span class="o">=</span> <span class="n">mem_coef_cos</span> <span class="o">*</span> <span class="n">friction_cos</span><span class="p">[</span><span class="kc">None</span><span class="p">,:]</span> <span class="o">+</span> <span class="n">mem_coef_sin</span> <span class="o">*</span> <span class="n">friction_sin</span><span class="p">[</span><span class="kc">None</span><span class="p">,:]</span>
+        <span class="n">friction_tot</span> <span class="o">=</span> <span class="o">-</span><span class="n">friction_tot</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">friction_tot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">friction_tot</span><span class="p">,</span> <span class="n">a_min</span><span class="o">=</span><span class="n">epsilon</span><span class="p">,</span><span class="n">a_max</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">LEIntegrator</span><span class="p">(</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">friction</span><span class="o">=</span><span class="n">friction_tot</span> <span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="GLEIntegrator.addMemoryComponents">
+<a class="viewcode-back" href="../../../references/AIGLE.plugins.html#AIGLE.plugins.openmm_integrator.GLEIntegrator.addMemoryComponents">[docs]</a>
+    <span class="k">def</span> <span class="nf">addMemoryComponents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mem_cf_cos</span><span class="p">,</span> <span class="n">mem_cf_sin</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds memory components to the integrator.</span>
+<span class="sd">        FvCos[i] and Fvsin[i] value only, in the unit of length (nm).</span>
+<span class="sd">        MemCoefCos[i] and MemCoefSin[i] value only, in the the unit of (1/ps)^2.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            mem_cf_cos (np.array): shape=(nparticle,3, nmodes), (value only) in unit of nm (1/ps)^2</span>
+<span class="sd">            mem_cf_sin (np.array): shape=(nparticle,3, nmodes), (value only) in unit of (1/ps)^2</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nmodes</span><span class="p">):</span>
+            <span class="c1">## the memory components</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addPerDofVariable</span><span class="p">(</span><span class="s1">&#39;FvCos</span><span class="si">{:d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addPerDofVariable</span><span class="p">(</span><span class="s1">&#39;FvSin</span><span class="si">{:d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="c1">## the weight of the memory components in Fv</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addPerDofVariable</span><span class="p">(</span><span class="s1">&#39;MemCoefCos</span><span class="si">{:d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="mi">0</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setPerDofVariableByName</span><span class="p">(</span><span class="s1">&#39;MemCoefCos</span><span class="si">{:d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">mem_cf_cos</span><span class="p">[</span><span class="o">...</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addPerDofVariable</span><span class="p">(</span><span class="s1">&#39;MemCoefSin</span><span class="si">{:d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="mi">0</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setPerDofVariableByName</span><span class="p">(</span><span class="s1">&#39;MemCoefSin</span><span class="si">{:d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">mem_cf_sin</span><span class="p">[</span><span class="o">...</span><span class="p">,</span><span class="n">i</span><span class="p">])</span></div>
+
+    
+<div class="viewcode-block" id="GLEIntegrator.addNoiseComponents">
+<a class="viewcode-back" href="../../../references/AIGLE.plugins.html#AIGLE.plugins.openmm_integrator.GLEIntegrator.addNoiseComponents">[docs]</a>
+    <span class="k">def</span> <span class="nf">addNoiseComponents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="n">noise_cf_cos</span><span class="p">,</span> <span class="n">noise_cf_sin</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds noise components to the integrator.</span>
+<span class="sd">        NoiseCos[i] and NoiseSin[i] have the unit of length (nm).</span>
+<span class="sd">        NoiseCoefCos[i] and NoiseCoefSin[i] have the unit of (1/ps)^2.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            noise_cf_cos (np.array): shape=(nparticle,3, nmodes), (value only) in unit of (1/ps)^2</span>
+<span class="sd">            noise_cf_sin (np.array): shape=(nparticle,3, nmodes), (value only) in unit of (1/ps)^2</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nmodes</span><span class="p">):</span>
+            <span class="c1">## the xi process</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addPerDofVariable</span><span class="p">(</span><span class="s1">&#39;NoiseCos</span><span class="si">{:d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span><span class="mi">0</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addPerDofVariable</span><span class="p">(</span><span class="s1">&#39;NoiseSin</span><span class="si">{:d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span><span class="mi">0</span><span class="p">)</span>
+            <span class="c1">## the weight of the xi process in noise</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addPerDofVariable</span><span class="p">(</span><span class="s1">&#39;NoiseCoefCos</span><span class="si">{:d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="mi">0</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setPerDofVariableByName</span><span class="p">(</span><span class="s1">&#39;NoiseCoefCos</span><span class="si">{:d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">noise_cf_cos</span><span class="p">[</span><span class="o">...</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addPerDofVariable</span><span class="p">(</span><span class="s1">&#39;NoiseCoefSin</span><span class="si">{:d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="mi">0</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setPerDofVariableByName</span><span class="p">(</span><span class="s1">&#39;NoiseCoefSin</span><span class="si">{:d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">noise_cf_sin</span><span class="p">[</span><span class="o">...</span><span class="p">,</span><span class="n">i</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="GLEIntegrator.updateMemory">
+<a class="viewcode-back" href="../../../references/AIGLE.plugins.html#AIGLE.plugins.openmm_integrator.GLEIntegrator.updateMemory">[docs]</a>
+    <span class="k">def</span> <span class="nf">updateMemory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update each memory component. Then sum up the memory force.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nmodes</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addComputePerDof</span><span class="p">(</span><span class="s2">&quot;BufferCos&quot;</span><span class="p">,</span> <span class="s2">&quot;Z1</span><span class="si">{:d}</span><span class="s2">*FvCos</span><span class="si">{:d}</span><span class="s2"> - Z2</span><span class="si">{:d}</span><span class="s2">*FvSin</span><span class="si">{:d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">i</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addComputePerDof</span><span class="p">(</span><span class="s2">&quot;BufferSin&quot;</span><span class="p">,</span> <span class="s2">&quot;Z1</span><span class="si">{:d}</span><span class="s2">*FvSin</span><span class="si">{:d}</span><span class="s2"> + Z2</span><span class="si">{:d}</span><span class="s2">*FvCos</span><span class="si">{:d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">i</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addComputePerDof</span><span class="p">(</span><span class="s2">&quot;FvCos</span><span class="si">{:d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> 
+                                  <span class="s2">&quot;BufferCos + dt*Z0Cos</span><span class="si">{:d}</span><span class="s2">*v*m&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addComputePerDof</span><span class="p">(</span><span class="s2">&quot;FvSin</span><span class="si">{:d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
+                                  <span class="s2">&quot;BufferSin + dt*Z0Sin</span><span class="si">{:d}</span><span class="s2">*v*m&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+        <span class="c1">## sum up the force</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addComputePerDof</span><span class="p">(</span><span class="s2">&quot;Fv&quot;</span><span class="p">,</span> <span class="s2">&quot;Fv*0&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nmodes</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addComputePerDof</span><span class="p">(</span><span class="s2">&quot;Fv&quot;</span><span class="p">,</span> 
+                                  <span class="s2">&quot;Fv + MemCoefCos</span><span class="si">{:d}</span><span class="s2">*FvCos</span><span class="si">{:d}</span><span class="s2"> + MemCoefSin</span><span class="si">{:d}</span><span class="s2">*FvSin</span><span class="si">{:d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">i</span><span class="p">))</span></div>
+
+        
+<div class="viewcode-block" id="GLEIntegrator.updateNoise">
+<a class="viewcode-back" href="../../../references/AIGLE.plugins.html#AIGLE.plugins.openmm_integrator.GLEIntegrator.updateNoise">[docs]</a>
+    <span class="k">def</span> <span class="nf">updateNoise</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update each noise component. Then sum up the noise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addComputePerDof</span><span class="p">(</span><span class="s2">&quot;whiteNoise&quot;</span><span class="p">,</span> <span class="s2">&quot;sqrt(1/dt) * gaussian&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nmodes</span><span class="p">):</span>
+            <span class="c1">## cosine xi-process will take in the white noise scaled by sqrt(kBT/tau/m/dt)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addComputePerDof</span><span class="p">(</span><span class="s2">&quot;BufferCos&quot;</span><span class="p">,</span> <span class="s2">&quot;Z1</span><span class="si">{:d}</span><span class="s2">*NoiseCos</span><span class="si">{:d}</span><span class="s2"> - Z2</span><span class="si">{:d}</span><span class="s2">*NoiseSin</span><span class="si">{:d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">i</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addComputePerDof</span><span class="p">(</span><span class="s2">&quot;BufferSin&quot;</span><span class="p">,</span> <span class="s2">&quot;Z1</span><span class="si">{:d}</span><span class="s2">*NoiseSin</span><span class="si">{:d}</span><span class="s2"> + Z2</span><span class="si">{:d}</span><span class="s2">*NoiseCos</span><span class="si">{:d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">i</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addComputePerDof</span><span class="p">(</span><span class="s2">&quot;NoiseCos</span><span class="si">{:d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
+                                  <span class="s2">&quot;BufferCos + dt*Z0Cos</span><span class="si">{:d}</span><span class="s2">*whiteNoise&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addComputePerDof</span><span class="p">(</span><span class="s2">&quot;NoiseSin</span><span class="si">{:d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
+                                  <span class="s2">&quot;BufferSin + dt*Z0Sin</span><span class="si">{:d}</span><span class="s2">*whiteNoise&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+        <span class="c1">## sum up the noise</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addComputePerDof</span><span class="p">(</span><span class="s2">&quot;Noise&quot;</span><span class="p">,</span> <span class="s2">&quot;Noise*0&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nmodes</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addComputePerDof</span><span class="p">(</span><span class="s2">&quot;Noise&quot;</span><span class="p">,</span> 
+                                  <span class="s2">&quot;Noise + NoiseCoefCos</span><span class="si">{:d}</span><span class="s2">*NoiseCos</span><span class="si">{:d}</span><span class="s2"> + NoiseCoefSin</span><span class="si">{:d}</span><span class="s2">*NoiseSin</span><span class="si">{:d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">i</span><span class="p">))</span></div>
+
+                        
+<div class="viewcode-block" id="GLEIntegrator.setIntegrationScheme">
+<a class="viewcode-back" href="../../../references/AIGLE.plugins.html#AIGLE.plugins.openmm_integrator.GLEIntegrator.setIntegrationScheme">[docs]</a>
+    <span class="k">def</span> <span class="nf">setIntegrationScheme</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        leap frog</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addConstrainVelocities</span><span class="p">()</span>
+        <span class="c1">## update position</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addComputePerDof</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;x + 0.5*dt*v&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addUpdateContextState</span><span class="p">()</span>
+        <span class="c1">## update memory force and noise</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateMemory</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateNoise</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addComputePerDof</span><span class="p">(</span><span class="s2">&quot;v&quot;</span><span class="p">,</span> <span class="s2">&quot;v + dt*f/m&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addComputePerDof</span><span class="p">(</span><span class="s2">&quot;v&quot;</span><span class="p">,</span> <span class="s2">&quot;v + dt*Fv/m&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addComputePerDof</span><span class="p">(</span><span class="s2">&quot;v&quot;</span><span class="p">,</span> <span class="s2">&quot;v + dt*Noise/sqrt(m)&quot;</span><span class="p">)</span>
+        <span class="c1">## update position</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addComputePerDof</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;x + 0.5*dt*v&quot;</span><span class="p">)</span>
+        <span class="c1">## constraint positions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addComputePerDof</span><span class="p">(</span><span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addConstrainPositions</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addComputePerDof</span><span class="p">(</span><span class="s2">&quot;v&quot;</span><span class="p">,</span> <span class="s2">&quot;v + (x-x1)/dt&quot;</span><span class="p">)</span></div>
+</div>
+
+
+ 
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Pinchen Xie.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

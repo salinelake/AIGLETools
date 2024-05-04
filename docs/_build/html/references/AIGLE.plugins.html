@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AIGLE.plugins package &mdash; AIGLETools 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/documentation_options.js?v=2709fde1"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            AIGLETools
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">AIGLE.plugins package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-AIGLE.plugins.openmm_integrator">AIGLE.plugins.openmm_integrator module</a><ul>
+<li><a class="reference internal" href="#AIGLE.plugins.openmm_integrator.GLEIntegrator"><code class="docutils literal notranslate"><span class="pre">GLEIntegrator</span></code></a><ul>
+<li><a class="reference internal" href="#AIGLE.plugins.openmm_integrator.GLEIntegrator.addMemoryComponents"><code class="docutils literal notranslate"><span class="pre">GLEIntegrator.addMemoryComponents()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.plugins.openmm_integrator.GLEIntegrator.addNoiseComponents"><code class="docutils literal notranslate"><span class="pre">GLEIntegrator.addNoiseComponents()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.plugins.openmm_integrator.GLEIntegrator.get_langevin_integrator"><code class="docutils literal notranslate"><span class="pre">GLEIntegrator.get_langevin_integrator()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.plugins.openmm_integrator.GLEIntegrator.setIntegrationScheme"><code class="docutils literal notranslate"><span class="pre">GLEIntegrator.setIntegrationScheme()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.plugins.openmm_integrator.GLEIntegrator.updateMemory"><code class="docutils literal notranslate"><span class="pre">GLEIntegrator.updateMemory()</span></code></a></li>
+<li><a class="reference internal" href="#AIGLE.plugins.openmm_integrator.GLEIntegrator.updateNoise"><code class="docutils literal notranslate"><span class="pre">GLEIntegrator.updateNoise()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#AIGLE.plugins.openmm_integrator.LEIntegrator"><code class="docutils literal notranslate"><span class="pre">LEIntegrator</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-AIGLE.plugins">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">AIGLETools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">AIGLE.plugins package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/references/AIGLE.plugins.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="aigle-plugins-package">
+<h1>AIGLE.plugins package<a class="headerlink" href="#aigle-plugins-package" title="Link to this heading">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-AIGLE.plugins.openmm_integrator">
+<span id="aigle-plugins-openmm-integrator-module"></span><h2>AIGLE.plugins.openmm_integrator module<a class="headerlink" href="#module-AIGLE.plugins.openmm_integrator" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="AIGLE.plugins.openmm_integrator.GLEIntegrator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">AIGLE.plugins.openmm_integrator.</span></span><span class="sig-name descname"><span class="pre">GLEIntegrator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/plugins/openmm_integrator.html#GLEIntegrator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.plugins.openmm_integrator.GLEIntegrator" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">CustomIntegrator</span></code></p>
+<p>The integrator for generalized langevin equations (GLE): ma = F + int K(t-s) v(s) ds + n(t)
+For each particle, assume the memory and noise effects are isotropic.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.plugins.openmm_integrator.GLEIntegrator.addMemoryComponents">
+<span class="sig-name descname"><span class="pre">addMemoryComponents</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mem_cf_cos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mem_cf_sin</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/plugins/openmm_integrator.html#GLEIntegrator.addMemoryComponents"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.plugins.openmm_integrator.GLEIntegrator.addMemoryComponents" title="Link to this definition">¶</a></dt>
+<dd><p>Adds memory components to the integrator.
+FvCos[i] and Fvsin[i] value only, in the unit of length (nm).
+MemCoefCos[i] and MemCoefSin[i] value only, in the the unit of (1/ps)^2.
+Args:</p>
+<blockquote>
+<div><p>mem_cf_cos (np.array): shape=(nparticle,3, nmodes), (value only) in unit of nm (1/ps)^2
+mem_cf_sin (np.array): shape=(nparticle,3, nmodes), (value only) in unit of (1/ps)^2</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.plugins.openmm_integrator.GLEIntegrator.addNoiseComponents">
+<span class="sig-name descname"><span class="pre">addNoiseComponents</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">noise_cf_cos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_cf_sin</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/plugins/openmm_integrator.html#GLEIntegrator.addNoiseComponents"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.plugins.openmm_integrator.GLEIntegrator.addNoiseComponents" title="Link to this definition">¶</a></dt>
+<dd><p>Adds noise components to the integrator.
+NoiseCos[i] and NoiseSin[i] have the unit of length (nm).
+NoiseCoefCos[i] and NoiseCoefSin[i] have the unit of (1/ps)^2.
+Args:</p>
+<blockquote>
+<div><p>noise_cf_cos (np.array): shape=(nparticle,3, nmodes), (value only) in unit of (1/ps)^2
+noise_cf_sin (np.array): shape=(nparticle,3, nmodes), (value only) in unit of (1/ps)^2</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.plugins.openmm_integrator.GLEIntegrator.get_langevin_integrator">
+<span class="sig-name descname"><span class="pre">get_langevin_integrator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temperature</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/plugins/openmm_integrator.html#GLEIntegrator.get_langevin_integrator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.plugins.openmm_integrator.GLEIntegrator.get_langevin_integrator" title="Link to this definition">¶</a></dt>
+<dd><dl>
+<dt>Args:</dt><dd><p>temperature (float): in unit of Kelvin
+timestep (float): in unit of picosecond
+epsilon (float): the minimum value of the friction coefficient, in unit of 1/picosecond.</p>
+<blockquote>
+<div><p>epsilon should be positive to avoid negative friction coefficient derived from GLE.</p>
+</div></blockquote>
+</dd>
+<dt>Returns:</dt><dd><p>a Langevin Equation integrator with the instantaneous friction derived from the GLE integrator</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.plugins.openmm_integrator.GLEIntegrator.setIntegrationScheme">
+<span class="sig-name descname"><span class="pre">setIntegrationScheme</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/plugins/openmm_integrator.html#GLEIntegrator.setIntegrationScheme"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.plugins.openmm_integrator.GLEIntegrator.setIntegrationScheme" title="Link to this definition">¶</a></dt>
+<dd><p>leap frog</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.plugins.openmm_integrator.GLEIntegrator.updateMemory">
+<span class="sig-name descname"><span class="pre">updateMemory</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/plugins/openmm_integrator.html#GLEIntegrator.updateMemory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.plugins.openmm_integrator.GLEIntegrator.updateMemory" title="Link to this definition">¶</a></dt>
+<dd><p>Update each memory component. Then sum up the memory force.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AIGLE.plugins.openmm_integrator.GLEIntegrator.updateNoise">
+<span class="sig-name descname"><span class="pre">updateNoise</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/plugins/openmm_integrator.html#GLEIntegrator.updateNoise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.plugins.openmm_integrator.GLEIntegrator.updateNoise" title="Link to this definition">¶</a></dt>
+<dd><p>Update each noise component. Then sum up the noise.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="AIGLE.plugins.openmm_integrator.LEIntegrator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">AIGLE.plugins.openmm_integrator.</span></span><span class="sig-name descname"><span class="pre">LEIntegrator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temperature</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">friction</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AIGLE/plugins/openmm_integrator.html#LEIntegrator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AIGLE.plugins.openmm_integrator.LEIntegrator" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">CustomIntegrator</span></code></p>
+<p>The integrator for langevin equations (LE): ma = F - friction*v + white_noise
+For each particle, assume the memory and noise effects are isotropic.</p>
+</dd></dl>
+
+</section>
+<section id="module-AIGLE.plugins">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-AIGLE.plugins" title="Link to this heading">¶</a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Pinchen Xie.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

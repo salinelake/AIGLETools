@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AIGLE.simulator &mdash; AIGLETools 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/documentation_options.js?v=2709fde1"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            AIGLETools
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">AIGLETools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">AIGLE.simulator</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for AIGLE.simulator</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">torch</span> <span class="k">as</span> <span class="nn">th</span>
+<span class="c1"># from .utilities import np2th, th2np</span>
+ 
+<div class="viewcode-block" id="GLESimulator">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.simulator.GLESimulator">[docs]</a>
+<span class="k">class</span> <span class="nc">GLESimulator</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">timestep</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ndim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">mass</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">buffer_size</span><span class="o">=</span><span class="mi">40</span><span class="p">):</span>
+        <span class="c1">## system parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">energy_engine</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">force_engine</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">position_constraint</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="n">timestep</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mass</span> <span class="o">=</span> <span class="n">mass</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kbT</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;kbT&#39;</span><span class="p">]</span> <span class="c1">## energy unit is kbT</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buffer_size</span> <span class="o">=</span> <span class="n">buffer_size</span>
+        
+        <span class="c1">## GLE parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">taus</span> <span class="o">=</span>  <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;taus&#39;</span><span class="p">])</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">alphas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;freqs&#39;</span><span class="p">])</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">=</span> <span class="n">ndim</span>
+        <span class="n">nmodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alphas</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nmodes</span> <span class="o">=</span> <span class="n">nmodes</span>
+        <span class="c1">## constanst for integration</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">z0_cos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">taus</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">alphas</span><span class="p">)</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">z0_sin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">taus</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">alphas</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">z1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">taus</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">alphas</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">z2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">taus</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">alphas</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">z0_cos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">z0_cos</span><span class="p">[</span><span class="kc">None</span><span class="p">,:]</span> <span class="c1">## (1, nmodes)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">z0_sin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">z0_sin</span><span class="p">[</span><span class="kc">None</span><span class="p">,:]</span> <span class="c1">## (1, nmodes)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">z1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">z1</span><span class="p">[</span><span class="kc">None</span><span class="p">,:]</span> <span class="c1">## (1, nmodes)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">z2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">z2</span><span class="p">[</span><span class="kc">None</span><span class="p">,:]</span> <span class="c1">## (1, nmodes)</span>
+
+        <span class="c1">## memory and noise coefficients</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mem_coef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;mem_coef&#39;</span><span class="p">])</span> <span class="c1">## (ndim, nmodes*2)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">noise_coef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;noise_coef&#39;</span><span class="p">])</span> <span class="c1">## (ndim, nmodes*2)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">mem_coef</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">ndim</span><span class="p">,</span> <span class="n">nmodes</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_coef</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">ndim</span><span class="p">,</span> <span class="n">nmodes</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span>    
+        <span class="bp">self</span><span class="o">.</span><span class="n">mem_coef_cos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mem_coef</span><span class="p">[:,:</span><span class="n">nmodes</span><span class="p">]</span> <span class="c1">## (ndim, nmodes)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mem_coef_sin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mem_coef</span><span class="p">[:,</span><span class="n">nmodes</span><span class="p">:]</span> <span class="c1">## (ndim, nmodes)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">noise_coef_cos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_coef</span><span class="p">[:,:</span><span class="n">nmodes</span><span class="p">]</span> <span class="c1">## (ndim, nmodes)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">noise_coef_sin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_coef</span><span class="p">[:,</span><span class="n">nmodes</span><span class="p">:]</span> <span class="c1">## (ndim, nmodes)</span>
+        
+   
+        
+        <span class="c1">## system configuration</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span>  <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ndim</span><span class="p">)</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">x_history</span> <span class="o">=</span>  <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">buffer_size</span><span class="p">,</span> <span class="n">ndim</span><span class="p">))</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">=</span>  <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ndim</span><span class="p">)</span>
+
+        <span class="c1">## GLE variables</span>
+        <span class="c1">#### memory force</span>
+        <span class="c1"># self.Fv_tot = th.zeros_like(self.x)  ## total memory force, shape = (ndim)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Fv_cos</span> <span class="o">=</span>  <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">ndim</span><span class="p">,</span><span class="n">nmodes</span><span class="p">))</span> <span class="c1">## cos component of memory force, shape = (ndim, nmodes)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Fv_sin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Fv_cos</span><span class="p">)</span>  <span class="c1">## sin component of memory force, shape = (ndim, nmodes)</span>
+        <span class="c1">#### noise</span>
+        <span class="c1"># self.noise_tot = th.zeros_like(self.x)  ## total noise , shape = (ndim)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">noise_cos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Fv_cos</span><span class="p">)</span>  <span class="c1">## cos component of noise, shape = (ndim, nmodes)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">noise_sin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Fv_cos</span><span class="p">)</span>  <span class="c1">## sin component of noise, shape = (ndim, nmodes)</span>
+
+<div class="viewcode-block" id="GLESimulator.get_langevin_integrator">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.simulator.GLESimulator.get_langevin_integrator">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_langevin_integrator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">):</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">taus</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alphas</span>
+        
+        <span class="c1">## compute the friction coefficient</span>
+        <span class="n">friction_cos</span> <span class="o">=</span> <span class="n">a</span> <span class="o">/</span> <span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">friction_sin</span> <span class="o">=</span> <span class="n">b</span> <span class="o">/</span> <span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">friction_tot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mem_coef_cos</span> <span class="o">*</span> <span class="n">friction_cos</span><span class="p">[</span><span class="kc">None</span><span class="p">,:]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">mem_coef_sin</span> <span class="o">*</span> <span class="n">friction_sin</span><span class="p">[</span><span class="kc">None</span><span class="p">,:]</span>
+        <span class="n">friction_tot</span> <span class="o">=</span> <span class="o">-</span><span class="n">friction_tot</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">friction_tot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">friction_tot</span><span class="p">,</span> <span class="n">a_min</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+        <span class="n">simulator</span> <span class="o">=</span> <span class="n">LESimulator</span><span class="p">(</span> <span class="n">friction</span><span class="o">=</span><span class="n">friction_tot</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> 
+            <span class="n">timestep</span><span class="o">=</span><span class="n">timestep</span><span class="p">,</span> <span class="n">ndim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ndim</span><span class="p">,</span> <span class="n">kbT</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kbT</span><span class="p">,</span> <span class="n">mass</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mass</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+        <span class="n">simulator</span><span class="o">.</span><span class="n">set_force_engine</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">force_engine</span><span class="p">)</span>
+        <span class="n">simulator</span><span class="o">.</span><span class="n">set_energy_engine</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">energy_engine</span><span class="p">)</span>
+        <span class="n">simulator</span><span class="o">.</span><span class="n">set_constraint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">position_constraint</span><span class="p">)</span>
+        <span class="c1">### TODOL: fix cuda device issue</span>
+        <span class="k">return</span> <span class="n">simulator</span></div>
+
+    
+<div class="viewcode-block" id="GLESimulator.set_force_engine">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.simulator.GLESimulator.set_force_engine">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_force_engine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f_func</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">force_engine</span> <span class="o">=</span> <span class="n">f_func</span> </div>
+
+
+<div class="viewcode-block" id="GLESimulator.set_energy_engine">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.simulator.GLESimulator.set_energy_engine">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_energy_engine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e_func</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">energy_engine</span> <span class="o">=</span> <span class="n">e_func</span> </div>
+
+   
+<div class="viewcode-block" id="GLESimulator.set_constraint">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.simulator.GLESimulator.set_constraint">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_constraint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position_constraint</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">position_constraint</span> <span class="o">=</span> <span class="n">position_constraint</span></div>
+
+
+<div class="viewcode-block" id="GLESimulator.set_position">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.simulator.GLESimulator.set_position">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x0</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x0</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x_history</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_history</span> <span class="o">*</span> <span class="mi">0</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="kc">None</span><span class="p">,:]</span></div>
+
+
+<div class="viewcode-block" id="GLESimulator.update_memory">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.simulator.GLESimulator.update_memory">[docs]</a>
+    <span class="k">def</span> <span class="nf">update_memory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update each memory component and sum them up</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Fv_cos (ndim, nmodes) </span>
+        <span class="n">_Fv_cos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">z0_cos</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">[:,</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">z1</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">Fv_cos</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">z2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">Fv_sin</span>
+        <span class="n">_Fv_sin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">z0_sin</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">[:,</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">z1</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">Fv_sin</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">z2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">Fv_cos</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Fv_cos</span> <span class="o">=</span> <span class="n">_Fv_cos</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Fv_sin</span> <span class="o">=</span> <span class="n">_Fv_sin</span>
+        <span class="c1">## get the total memory force</span>
+        <span class="n">Fv_tot</span> <span class="o">=</span> <span class="p">(</span><span class="n">_Fv_cos</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mem_coef_cos</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">Fv_tot</span> <span class="o">+=</span> <span class="p">(</span><span class="n">_Fv_sin</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mem_coef_sin</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Fv_tot</span></div>
+
+    
+<div class="viewcode-block" id="GLESimulator.update_noise">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.simulator.GLESimulator.update_noise">[docs]</a>
+    <span class="k">def</span> <span class="nf">update_noise</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update each noise component and sum them up</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">whiteNoise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ndim</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">dt</span><span class="p">)</span><span class="o">**</span><span class="mf">0.5</span>
+        <span class="n">_noise_cos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">z0_cos</span> <span class="o">*</span> <span class="n">whiteNoise</span><span class="p">[:,</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">z1</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_cos</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">z2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_sin</span>
+        <span class="n">_noise_sin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">z0_sin</span> <span class="o">*</span> <span class="n">whiteNoise</span><span class="p">[:,</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">z1</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_sin</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">z2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_cos</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">noise_cos</span> <span class="o">=</span> <span class="n">_noise_cos</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">noise_sin</span> <span class="o">=</span> <span class="n">_noise_sin</span>
+        <span class="c1">## get the total noise</span>
+        <span class="n">noise_tot</span> <span class="o">=</span> <span class="p">(</span><span class="n">_noise_cos</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_coef_cos</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">noise_tot</span> <span class="o">+=</span> <span class="p">(</span><span class="n">_noise_sin</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_coef_sin</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">noise_tot</span></div>
+
+        
+<div class="viewcode-block" id="GLESimulator.applyConstrainPositions">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.simulator.GLESimulator.applyConstrainPositions">[docs]</a>
+    <span class="k">def</span> <span class="nf">applyConstrainPositions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">position_constraint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span></div>
+
+        
+<div class="viewcode-block" id="GLESimulator.get_instant_temp">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.simulator.GLESimulator.get_instant_temp">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_instant_temp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Returns the instant temperature in unit of kbT</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">kinetic</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">instant_temp</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">kinetic</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">kbT</span>
+        <span class="k">return</span> <span class="n">instant_temp</span></div>
+
+    
+<div class="viewcode-block" id="GLESimulator.update_state">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.simulator.GLESimulator.update_state">[docs]</a>
+    <span class="k">def</span> <span class="nf">update_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update the state of the system</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span>
+        <span class="n">mass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">+=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">/</span> <span class="n">mass</span>
+        <span class="n">force</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">force_engine</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span> 
+        <span class="n">Fv_tot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_memory</span><span class="p">()</span>
+        <span class="n">noise_tot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_noise</span><span class="p">()</span>
+        <span class="n">dp_dt</span> <span class="o">=</span> <span class="n">force</span> <span class="o">+</span> <span class="n">Fv_tot</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mass</span><span class="p">)</span> <span class="o">*</span> <span class="n">noise_tot</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">+=</span> <span class="n">dt</span> <span class="o">*</span> <span class="n">dp_dt</span>
+        <span class="c1">## A</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">+=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">/</span> <span class="n">mass</span>
+        <span class="k">return</span> </div>
+
+  
+<div class="viewcode-block" id="GLESimulator.step">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.simulator.GLESimulator.step">[docs]</a>
+    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">energy_upper_bound</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        leap frog</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_state</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">position_constraint</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">applyConstrainPositions</span><span class="p">()</span>
+            <span class="c1">## check energy constraint</span>
+            <span class="k">if</span> <span class="n">energy_upper_bound</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_engine</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">energy</span> <span class="o">&gt;</span> <span class="n">energy_upper_bound</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_history</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;warning: step=</span><span class="si">{}</span><span class="s1">, enter unexplored region, reset to previous position&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_step</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_history</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">-=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_history</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Invalid initial position, please reset&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">x_history</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="kc">None</span><span class="p">,:]</span> <span class="o">*</span> <span class="mf">1.0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_history</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">+=</span> <span class="mi">1</span></div>
+</div>
+
+ 
+
+<div class="viewcode-block" id="LESimulator">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.simulator.LESimulator">[docs]</a>
+<span class="k">class</span> <span class="nc">LESimulator</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">friction</span><span class="p">,</span> <span class="n">timestep</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ndim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">kbT</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="n">mass</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1">## system parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="n">timestep</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kbT</span> <span class="o">=</span> <span class="n">kbT</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">=</span> <span class="n">ndim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">force_engine</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">energy_engine</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">position_constraint</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mass</span> <span class="o">=</span> <span class="n">mass</span>  <span class="c1">## kbT / (nm/ps)**2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">friction</span> <span class="o">=</span> <span class="n">friction</span>  <span class="c1"># (ndim)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span> <span class="o">-</span><span class="n">timestep</span> <span class="o">*</span> <span class="n">friction</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="o">=</span> <span class="p">(</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span> <span class="o">-</span><span class="mi">2</span> <span class="o">*</span> <span class="n">timestep</span> <span class="o">*</span> <span class="n">friction</span> <span class="p">))</span><span class="o">**</span><span class="mf">0.5</span>
+        
+        <span class="c1">## system configuration</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span>  <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ndim</span><span class="p">)</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">x_history</span> <span class="o">=</span>  <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">40</span><span class="p">,</span> <span class="n">ndim</span><span class="p">))</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">v</span> <span class="o">=</span>  <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ndim</span><span class="p">)</span>
+
+<div class="viewcode-block" id="LESimulator.set_force_engine">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.simulator.LESimulator.set_force_engine">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_force_engine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f_func</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">force_engine</span> <span class="o">=</span> <span class="n">f_func</span> </div>
+
+
+<div class="viewcode-block" id="LESimulator.set_energy_engine">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.simulator.LESimulator.set_energy_engine">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_energy_engine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e_func</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">energy_engine</span> <span class="o">=</span> <span class="n">e_func</span></div>
+
+
+<div class="viewcode-block" id="LESimulator.set_constraint">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.simulator.LESimulator.set_constraint">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_constraint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position_constraint</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">position_constraint</span> <span class="o">=</span> <span class="n">position_constraint</span></div>
+
+
+<div class="viewcode-block" id="LESimulator.set_position">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.simulator.LESimulator.set_position">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x0</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x0</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x_history</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_history</span> <span class="o">*</span><span class="mi">0</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="kc">None</span><span class="p">,:]</span></div>
+
+        
+<div class="viewcode-block" id="LESimulator.applyConstrainPositions">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.simulator.LESimulator.applyConstrainPositions">[docs]</a>
+    <span class="k">def</span> <span class="nf">applyConstrainPositions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">position_constraint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span></div>
+
+        
+<div class="viewcode-block" id="LESimulator.get_instant_temp">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.simulator.LESimulator.get_instant_temp">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_instant_temp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Returns the instant temperature in unit of kbT</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">kinetic</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">v</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">instant_temp</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">kinetic</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">kbT</span> 
+        <span class="k">return</span> <span class="n">instant_temp</span></div>
+
+    
+<div class="viewcode-block" id="LESimulator.step">
+<a class="viewcode-back" href="../../references/AIGLE.html#AIGLE.simulator.LESimulator.step">[docs]</a>
+    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">energy_upper_bound</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">dt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">force</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">force_engine</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">gaussian</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ndim</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">v</span> <span class="o">+=</span> <span class="n">dt</span> <span class="o">*</span> <span class="n">force</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">+=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="o">*</span> <span class="n">gaussian</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kbT</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">mass</span><span class="p">)</span><span class="o">**</span><span class="mf">0.5</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">+=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">position_constraint</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">applyConstrainPositions</span><span class="p">()</span>
+            <span class="c1">## check energy constraint</span>
+            <span class="k">if</span> <span class="n">energy_upper_bound</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_engine</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">energy</span> <span class="o">&gt;</span> <span class="n">energy_upper_bound</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_history</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;warning: step=</span><span class="si">{}</span><span class="s1">, enter unexplored region, reset to previous position&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_step</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_history</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">-=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_history</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Invalid initial position, please reset&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">x_history</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="kc">None</span><span class="p">,:]</span> <span class="o">*</span> <span class="mf">1.0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_history</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">+=</span> <span class="mi">1</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Pinchen Xie.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
