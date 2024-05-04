@@ -34,4 +34,4 @@ html_theme = 'sphinx_rtd_theme'
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 if __name__ == '__main__':
-    sys.path.insert(0, os.path.abspath('..'))
+    sys.path.insert(0, os.path.abspath('../AIGLE'))
