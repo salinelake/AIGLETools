@@ -16,6 +16,8 @@ copyright = '2024, Pinchen Xie'
 author = 'Pinchen Xie'
 release = '0.1'
 
+sys.path.insert(0, os.path.abspath('..'))
+
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
@@ -32,6 +34,3 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 html_theme = 'sphinx_rtd_theme'
 # html_static_path = ['_static']
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
-
-if __name__ == '__main__':
-    sys.path.insert(0, os.path.abspath('../AIGLE'))
