@@ -3,8 +3,12 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to AIGLETools's documentation!
-======================================
+==========================
+AIGLETools's documentation
+==========================
+
+DeePMD-kit is a package written in Python, designed to minimize the effort required to build generalized Langevin equation (GLE) & Langevin equation (LE) models for coarseg-grained molecular dynamics (CGMD) simulations.  
+
 
 .. toctree::
    :maxdepth: 2
