@@ -49,7 +49,7 @@ pip install .
 The training and simulation of AIGLE/AILE model follows the steps below
 
 <p align="center" >
-  <img width="50%" src="/docs/workflow.png" />
+  <img width="100%" src="/docs/workflow.png" />
 </p>
 
 
