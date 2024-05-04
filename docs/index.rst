@@ -7,7 +7,7 @@
 AIGLETools's documentation
 ==========================
 
-DeePMD-kit is a package written in Python, designed to minimize the effort required to build generalized Langevin equation (GLE) & Langevin equation (LE) models for coarseg-grained molecular dynamics (CGMD) simulations.  
+AIGLETools is a package written in Python, designed to minimize the effort required to build generalized Langevin equation (GLE) & Langevin equation (LE) models for coarse-grained molecular dynamics (CGMD) simulations.  
 
 
 .. toctree::
@@ -22,9 +22,4 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
-
-.. Appendix
-.. =========
-
-.. :doc:`references/api_reference`
+ 
