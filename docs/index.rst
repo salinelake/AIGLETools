@@ -9,6 +9,8 @@ AIGLETools's documentation
 
 AIGLETools is a package written in Python, designed to minimize the effort required to build generalized Langevin equation (GLE) & Langevin equation (LE) models for coarse-grained molecular dynamics (CGMD) simulations.  
 
+Documentation is still under development...
+
 
 .. toctree::
    :maxdepth: 2
