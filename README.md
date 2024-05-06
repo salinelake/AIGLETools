@@ -14,7 +14,7 @@ $\dot{\mathbf{x}}(t) = \mathbf{M}^{-1}\mathbf{p}(t)$.
 
 For n-dimensional generalized position $\mathbf{x}$ and n-dimensional generalized momentum $\mathbf{p}$, $G(\mathbf{x})$ is the effective potential energy of the system. $\mathbf{\xi}(t)$ and $\mathbf{F}(t)$ are respectively the external driving force and the environmental noise. $\mathbf{K}(s)$ is a $n\times n$ memory kernel matrix, describing how the system at time $t$ responds to its historical state at time $t-s$. $M$ is a static $n\times n$ matrix, describing the inertia of the system. 
 
-### What is Langevin equation (GLE)
+### What is Langevin equation (LE)
 
 The Langevin equation(LE) is the Markovian limit of GLE, given as
 
@@ -46,7 +46,7 @@ In the future, please cite our incoming preprint for general purpose.
 pip install .
 
 # Use AIGLETools
-The training and simulation of AIGLE/AILE model follows the steps below
+The training and simulation of AIGLE/AILE model follow the steps below
 
 <p align="center" >
   <img width="100%" src="/docs/workflow.png" />
@@ -54,7 +54,10 @@ The training and simulation of AIGLE/AILE model follows the steps below
 
 
 # Examples
-Check /examples for Jupyter notebook demonstration of case studies!
+Check /examples for Jupyter notebook demonstration of AIGLETools! More examples will be posted in the future.
 
 <!-- ## Units -->
 
+# Questions?
+
+AIGLETools is under active development. More examples will be posted. If you have any question, send email to pinchenx at math dot princeton dot edu.
