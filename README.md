@@ -52,6 +52,7 @@ The training and simulation of AIGLE/AILE model follow the steps below
   <img width="100%" src="/docs/workflow.png" />
 </p>
 
+/examples/harmonic_polymer demonstrates the whole workflow for particle-based coarse-graining. 
 
 # Examples
 Check /examples for Jupyter notebook demonstration of AIGLETools! More examples will be posted in the future.
