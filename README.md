@@ -40,7 +40,7 @@ AIGLE is the generalized Langevin equation extracted from the history of $\mathb
 - Exact enforcement of second fluctuation-dissipation theorem for long-term simulation
 
 # Credits
-In the future, please cite our incoming preprint for general purpose.
+Please cite Pinchen Xie, Yunrui Qiu and Weinan E. "Coarse-graining conformational dynamics with multi-dimensional generalized Langevin equation: how, when, and why." arXiv preprint arXiv:2405.12356 (2024). for general purpose.
 
 # Installation
 pip install .
@@ -53,9 +53,10 @@ The training and simulation of AIGLE/AILE model follow the steps below
 </p>
 
 /examples/harmonic_polymer demonstrates the whole workflow for particle-based coarse-graining. 
+/examples/alaine_dipeptide demonstrates the whole workflow for collective variable-based coarse-graining. 
 
 # Examples
-Check /examples for Jupyter notebook demonstration of AIGLETools! More examples will be posted in the future.
+Check /examples for Jupyter notebook demonstration of AIGLETools.
 
 <!-- ## Units -->
 
