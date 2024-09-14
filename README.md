@@ -40,7 +40,7 @@ AIGLE is the generalized Langevin equation extracted from the history of $\mathb
 - Exact enforcement of second fluctuation-dissipation theorem for long-term simulation
 
 # Credits
-Please cite Pinchen Xie, Yunrui Qiu and Weinan E. "Coarse-graining conformational dynamics with multi-dimensional generalized Langevin equation: how, when, and why." arXiv preprint arXiv:2405.12356 (2024). for general purpose.
+Please cite Xie, Pinchen, and Weinan E. "Coarse-Graining Conformational Dynamics with Multidimensional Generalized Langevin Equation: How, When, and Why." Journal of Chemical Theory and Computation (2024). (doi.org/10.1021/acs.jctc.4c00729) for general purposes.
 
 # Installation
 pip install .
